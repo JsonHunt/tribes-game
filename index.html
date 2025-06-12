@@ -223,6 +223,40 @@
             background: #2980b9;
         }
 
+        /* Settings Screen Styles */
+        .settings-group {
+            margin-bottom: 2rem;
+        }
+
+        .settings-group h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 0.5rem;
+        }
+
+        .config-checkbox {
+            width: auto;
+            margin: 0;
+        }
+
+        .config-range {
+            width: 60%;
+            margin-right: 10px;
+        }
+
+        #masterVolumeValue {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        /* Character name labels */
+        .character-name-label,
+        .character-action-label {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         .character-info-panel {
             position: absolute;
             top: 20px;
@@ -319,6 +353,28 @@
             color: #f39c12;
             font-weight: bold;
         }
+
+        /* Settings Screen Styles */
+        .settings-screen {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4a69bd 0%, #6f86d6 100%);
+        }
+
+        .settings-group {
+            margin-bottom: 2rem;
+        }
+
+        .config-checkbox {
+            transform: scale(1.2);
+            margin-left: 0.5rem;
+        }
+
+        .config-range {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -359,6 +415,64 @@
             <div class="button-group">
                 <button class="menu-button secondary-button" onclick="showStartScreen()">Back</button>
                 <button class="menu-button" onclick="beginGame()">Begin Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div class="screen settings-screen" id="settingsScreen">
+        <div class="config-panel">
+            <h2 class="config-title">Game Settings</h2>
+            
+            <div class="settings-group">
+                <h3>Visual Settings</h3>
+                <div class="config-group">
+                    <label class="config-label" for="showCharacterNames">Show Character Names:</label>
+                    <input type="checkbox" class="config-checkbox" id="showCharacterNames" checked>
+                </div>
+                <div class="config-group">
+                    <label class="config-label" for="showActionIndicators">Show Action Indicators:</label>
+                    <input type="checkbox" class="config-checkbox" id="showActionIndicators" checked>
+                </div>
+                <div class="config-group">
+                    <label class="config-label" for="enableSmoothAnimations">Smooth Animations:</label>
+                    <input type="checkbox" class="config-checkbox" id="enableSmoothAnimations" checked>
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Gameplay Settings</h3>
+                <div class="config-group">
+                    <label class="config-label" for="gameSpeed">Game Speed:</label>
+                    <select class="config-input" id="gameSpeed">
+                        <option value="0.5">Slow (0.5x)</option>
+                        <option value="1" selected>Normal (1x)</option>
+                        <option value="1.5">Fast (1.5x)</option>
+                        <option value="2">Very Fast (2x)</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label class="config-label" for="autoPause">Auto-pause on events:</label>
+                    <input type="checkbox" class="config-checkbox" id="autoPause">
+                </div>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Audio Settings</h3>
+                <div class="config-group">
+                    <label class="config-label" for="masterVolume">Master Volume:</label>
+                    <input type="range" class="config-range" id="masterVolume" min="0" max="100" value="50">
+                    <span id="masterVolumeValue">50%</span>
+                </div>
+                <div class="config-group">
+                    <label class="config-label" for="enableSoundEffects">Sound Effects:</label>
+                    <input type="checkbox" class="config-checkbox" id="enableSoundEffects" checked>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="menu-button secondary-button" onclick="showStartScreen()">Back to Main Menu</button>
+                <button class="menu-button" onclick="applySettings()">Apply & Save</button>
             </div>
         </div>
     </div>

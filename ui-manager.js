@@ -6,7 +6,10 @@ import GAME_CONFIG from './config.js';
 export class UIManager {
     constructor(gameState) {
         this.gameState = gameState;
-        this.setupEventListeners();
+        // Don't setup event listeners here - they'll be handled by ControlsManager
+        
+        // Load saved settings
+        this.gameState.settings = this.getGameSettings();
     }
 
     // Screen management functions
@@ -51,7 +54,8 @@ export class UIManager {
     }
 
     showSettings() {
-        alert('Settings functionality not implemented yet.');
+        this.showScreen('settingsScreen');
+        this.loadSettingsValues();
     }
 
     exitGame() {
@@ -158,39 +162,40 @@ export class UIManager {
                 charElement.className = 'character';
                 charElement.style.width = `${currentTileSize * 0.8}px`;
                 charElement.style.height = `${currentTileSize * 0.8}px`;
-                  // Color based on character's most urgent need
+                
+                // Color based on character's most urgent need
                 let color = '#e74c3c'; // Default red
                 let urgentNeed = null;
                 
                 if (character.getMostUrgentNeed) {
                     urgentNeed = character.getMostUrgentNeed();
-                }
-                
-                if (urgentNeed) {
-                    switch (urgentNeed.name) {
-                        case 'thirst':
-                            color = '#3498db'; // Blue for thirst
-                            break;
-                        case 'hunger':
-                            color = '#e67e22'; // Orange for hunger
-                            break;
-                        case 'rest':
-                            color = '#9b59b6'; // Purple for rest
-                            break;
-                        case 'safety':
-                            color = '#e74c3c'; // Red for safety
-                            break;
-                        case 'social':
-                            color = '#f39c12'; // Yellow for social
-                            break;
-                        default:
-                            color = '#27ae60'; // Green for content/other needs
-                            break;
+                    
+                    if (urgentNeed) {
+                        switch (urgentNeed.name) {
+                            case 'thirst':
+                                color = '#3498db'; // Blue for thirst
+                                break;
+                            case 'hunger':
+                                color = '#e67e22'; // Orange for hunger
+                                break;
+                            case 'rest':
+                                color = '#9b59b6'; // Purple for rest
+                                break;
+                            case 'safety':
+                                color = '#e74c3c'; // Red for safety
+                                break;
+                            case 'social':
+                                color = '#f39c12'; // Yellow for social
+                                break;
+                            default:
+                                color = '#27ae60'; // Green for content/other needs
+                                break;
+                        }
+                    } else if (character.state === CHARACTER_STATES.MOVING) {
+                        color = '#f39c12'; // Orange for moving
+                    } else if (character.state === CHARACTER_STATES.WAITING) {
+                        color = '#9b59b6'; // Purple for waiting
                     }
-                } else if (character.state === CHARACTER_STATES.MOVING) {
-                    color = '#f39c12'; // Orange for moving
-                } else if (character.state === CHARACTER_STATES.WAITING) {
-                    color = '#9b59b6'; // Purple for waiting
                 }
                 
                 charElement.style.backgroundColor = color;
@@ -206,13 +211,62 @@ export class UIManager {
                 charElement.style.zIndex = '10';
                 charElement.dataset.characterId = character.id;
                 
+                // Get settings
+                const settings = this.getGameSettings();
+                
+                // Add hover effects
+                charElement.style.cursor = 'pointer';
+                if (settings.enableSmoothAnimations) {
+                    charElement.style.transition = 'all 0.2s ease';
+                }
+                
+                // Add hover event listeners
+                charElement.addEventListener('mouseenter', (e) => {
+                    charElement.style.transform = 'scale(1.2)';
+                    charElement.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.8)';
+                    charElement.style.border = '2px solid rgba(255, 255, 255, 0.9)';
+                    charElement.style.zIndex = '15';
+                });
+                
+                charElement.addEventListener('mouseleave', (e) => {
+                    charElement.style.transform = 'scale(1)';
+                    charElement.style.border = '';
+                    charElement.style.zIndex = '10';
+                    // Reset to action-based shadow
+                    if (character.currentAction && settings.showActionIndicators) {
+                        switch (character.currentAction.type) {
+                            case ACTION_TYPES.MOVE_TO:
+                                charElement.style.boxShadow = '0 0 8px rgba(243, 156, 18, 0.6)';
+                                break;
+                            case ACTION_TYPES.DRINK:
+                                charElement.style.boxShadow = '0 0 8px rgba(52, 152, 219, 0.8)';
+                                break;
+                            case ACTION_TYPES.EAT:
+                                charElement.style.boxShadow = '0 0 8px rgba(230, 126, 34, 0.8)';
+                                break;
+                            case ACTION_TYPES.REST:
+                                charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.8)';
+                                break;
+                            case ACTION_TYPES.WAIT:
+                                charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.6)';
+                                break;
+                            default:
+                                charElement.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.3)';
+                                break;
+                        }
+                    } else {
+                        charElement.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.3)';
+                    }
+                });
+                
                 // Add click event to show character info
                 charElement.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.showCharacterInfo(character);
                 });
-                  // Add action indicator with enhanced visual feedback
-                if (character.currentAction) {
+                
+                // Add action indicator with enhanced visual feedback if enabled
+                if (character.currentAction && settings.showActionIndicators) {
                     switch (character.currentAction.type) {
                         case ACTION_TYPES.MOVE_TO:
                             charElement.style.boxShadow = '0 0 8px rgba(243, 156, 18, 0.6)';
@@ -243,18 +297,54 @@ export class UIManager {
                 
                 // Add tooltip with character information
                 if (urgentNeed) {
-                    charElement.title = `Character ${character.id}\nMost urgent need: ${urgentNeed.name} (${Math.round(urgentNeed.satisfaction)}%)\nAction: ${character.currentAction ? character.currentAction.type : 'idle'}`;
+                    charElement.title = `${character.name} (${character.gender}, ${character.age}, ${character.ethnicity})\nMost urgent need: ${urgentNeed.name} (${Math.round(urgentNeed.satisfaction)}%)\nAction: ${character.currentAction ? character.currentAction.type : 'idle'}`;
                 } else {
-                    charElement.title = `Character ${character.id}\nAction: ${character.currentAction ? character.currentAction.type : 'idle'}`;
+                    charElement.title = `${character.name} (${character.gender}, ${character.age}, ${character.ethnicity})\nAction: ${character.currentAction ? character.currentAction.type : 'idle'}`;
+                }
+                
+                // Add character name and action display at max zoom if enabled
+                if (settings.showCharacterNames && this.gameState.zoomLevel >= 2.8) { // Near max zoom
+                    const nameLabel = document.createElement('div');
+                    nameLabel.className = 'character-name-label';
+                    nameLabel.textContent = character.name;
+                    nameLabel.style.position = 'absolute';
+                    nameLabel.style.bottom = `${currentTileSize * 0.9}px`;
+                    nameLabel.style.left = '50%';
+                    nameLabel.style.transform = 'translateX(-50%)';
+                    nameLabel.style.fontSize = '10px';
+                    nameLabel.style.fontWeight = 'bold';
+                    nameLabel.style.color = 'white';
+                    nameLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
+                    nameLabel.style.pointerEvents = 'none';
+                    nameLabel.style.zIndex = '11';
+                    nameLabel.style.whiteSpace = 'nowrap';
+                    charElement.appendChild(nameLabel);
+                    
+                    if (character.currentAction && settings.showActionIndicators) {
+                        const actionLabel = document.createElement('div');
+                        actionLabel.className = 'character-action-label';
+                        actionLabel.textContent = character.currentAction.type.replace('_', ' ');
+                        actionLabel.style.position = 'absolute';
+                        actionLabel.style.bottom = `${currentTileSize * 1.1}px`;
+                        actionLabel.style.left = '50%';
+                        actionLabel.style.transform = 'translateX(-50%)';
+                        actionLabel.style.fontSize = '8px';
+                        actionLabel.style.color = 'rgba(255,255,255,0.8)';
+                        actionLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
+                        actionLabel.style.pointerEvents = 'none';
+                        actionLabel.style.zIndex = '11';
+                        actionLabel.style.whiteSpace = 'nowrap';
+                        charElement.appendChild(actionLabel);
+                    }
                 }
                 
                 tile.appendChild(charElement);
             });
         }
-    }
-
-    updateMapPosition() {
+    }    updateMapPosition() {
         const gameMap = document.getElementById('gameMap');
+        
+        if (!gameMap) return; // Safety check
         
         // Apply current position
         gameMap.style.transform = `translate(${this.gameState.mapPosition.x}px, ${this.gameState.mapPosition.y}px)`;
@@ -291,12 +381,15 @@ export class UIManager {
             this.gameState.zoomLevel -= 0.2;
             this.renderMap();
         }
-    }
-
-    // Map scrolling
+    }    // Map scrolling
     scrollMap(deltaX, deltaY) {
         const viewport = document.getElementById('gameViewport');
         const gameMap = document.getElementById('gameMap');
+        
+        if (!viewport || !gameMap) {
+            console.warn('Viewport or gameMap not found');
+            return; // Safety check
+        }
         
         const currentTileSize = this.gameState.tileSize * this.gameState.zoomLevel;
         const mapWidth = this.gameState.worldWidth * currentTileSize;
@@ -336,115 +429,7 @@ export class UIManager {
         this.gameState.mapPosition.y = newY;
         
         this.updateMapPosition();
-    }
-
-    // Setup event listeners
-    setupEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.setupKeyboardControls();
-            this.setupMouseControls();
-            this.setupWindowEvents();
-        });
-    }
-
-    setupKeyboardControls() {
-        // Keyboard controls for map scrolling
-        window.addEventListener('keydown', (event) => {
-            // Don't handle keyboard events if user is typing in an input field
-            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
-                return;
-            }
-            
-            if (this.gameState.currentScreen !== 'gameplayScreen') return;
-            
-            const scrollSpeed = 20;
-            
-            switch(event.key) {
-                case 'ArrowUp':
-                    event.preventDefault();
-                    this.scrollMap(0, scrollSpeed);
-                    break;
-                case 'ArrowDown':
-                    event.preventDefault();
-                    this.scrollMap(0, -scrollSpeed);
-                    break;
-                case 'ArrowLeft':
-                    event.preventDefault();
-                    this.scrollMap(scrollSpeed, 0);
-                    break;
-                case 'ArrowRight':
-                    event.preventDefault();
-                    this.scrollMap(-scrollSpeed, 0);
-                    break;
-            }
-        });
-    }
-
-    setupMouseControls() {
-        const viewport = document.getElementById('gameViewport');
-        if (!viewport) return;
-
-        // Mouse wheel zoom
-        viewport.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            
-            if (event.deltaY < 0) {
-                this.zoomIn();
-            } else {
-                this.zoomOut();
-            }
-        });
-
-        // Mouse drag functionality
-        viewport.addEventListener('mousedown', (event) => {
-            if (event.button === 0) { // Left mouse button
-                this.gameState.isDragging = true;
-                this.gameState.lastMousePos = { x: event.clientX, y: event.clientY };
-                viewport.style.cursor = 'grabbing';
-                event.preventDefault();
-            }
-        });
-
-        viewport.addEventListener('mousemove', (event) => {
-            if (this.gameState.isDragging) {
-                const deltaX = event.clientX - this.gameState.lastMousePos.x;
-                const deltaY = event.clientY - this.gameState.lastMousePos.y;
-                
-                this.scrollMap(deltaX, deltaY);
-                
-                this.gameState.lastMousePos = { x: event.clientX, y: event.clientY };
-                event.preventDefault();
-            }
-        });
-
-        viewport.addEventListener('mouseup', (event) => {
-            if (event.button === 0) { // Left mouse button
-                this.gameState.isDragging = false;
-                viewport.style.cursor = 'grab';
-                event.preventDefault();
-            }
-        });
-
-        viewport.addEventListener('mouseleave', () => {
-            this.gameState.isDragging = false;
-            viewport.style.cursor = 'grab';
-        });
-
-        // Set initial cursor style
-        viewport.style.cursor = 'grab';
-    }    setupWindowEvents() {
-        // Window resize handler
-        window.addEventListener('resize', () => {
-            if (this.gameState.currentScreen === 'gameplayScreen') {
-                this.updateMapPosition();
-            }
-        });
-
-        // Set focus to the window for keyboard controls
-        window.focus();
-    }
-
-    // Character info panel methods
+    }// Character info panel methods
     showCharacterInfo(character) {
         const panel = document.getElementById('characterInfoPanel');
         const characterIdSpan = document.getElementById('selectedCharacterId');
@@ -455,9 +440,12 @@ export class UIManager {
 
         if (!panel) return;
 
-        // Update character ID
+        // Always ensure panel is visible first
+        panel.style.display = 'block';
+
+        // Update character ID with name and demographics
         if (characterIdSpan) {
-            characterIdSpan.textContent = character.id;
+            characterIdSpan.textContent = `${character.name} (#${character.id})`;
         }
 
         // Update current most urgent need
@@ -469,6 +457,37 @@ export class UIManager {
             } else {
                 currentNeedDiv.textContent = 'Content';
                 currentNeedDiv.style.color = '#27ae60';
+            }
+        }
+
+        // Add character demographics section
+        const panelContent = panel.querySelector('.panel-content');
+        if (panelContent) {
+            // Remove existing demographics section if it exists
+            const existingDemographics = panelContent.querySelector('.demographics-section');
+            if (existingDemographics) {
+                existingDemographics.remove();
+            }
+            
+            // Create new demographics section
+            const demographicsSection = document.createElement('div');
+            demographicsSection.className = 'section demographics-section';
+            demographicsSection.innerHTML = `
+                <h4>Demographics</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9em;">
+                    <div><strong>Gender:</strong> ${character.gender}</div>
+                    <div><strong>Age:</strong> ${character.age}</div>
+                    <div><strong>Ethnicity:</strong> ${character.ethnicity}</div>
+                    <div><strong>Health:</strong> ${character.health}%</div>
+                </div>
+            `;
+            
+            // Insert after current need section
+            const currentNeedSection = panelContent.querySelector('.section');
+            if (currentNeedSection && currentNeedSection.nextSibling) {
+                panelContent.insertBefore(demographicsSection, currentNeedSection.nextSibling);
+            } else {
+                panelContent.appendChild(demographicsSection);
             }
         }
 
@@ -531,7 +550,7 @@ export class UIManager {
             }
         }
 
-        // Show the panel
+        // Ensure the panel is visible at the end
         panel.style.display = 'block';
     }
 
@@ -546,5 +565,83 @@ export class UIManager {
         if (satisfaction < 30) return '#e74c3c'; // Red for critical
         if (satisfaction < 60) return '#f39c12'; // Orange for low
         return '#27ae60'; // Green for satisfied
+    }
+
+    // Settings management
+    loadSettingsValues() {
+        // Load settings from localStorage or use defaults
+        const settings = this.getGameSettings();
+        
+        document.getElementById('showCharacterNames').checked = settings.showCharacterNames;
+        document.getElementById('showActionIndicators').checked = settings.showActionIndicators;
+        document.getElementById('enableSmoothAnimations').checked = settings.enableSmoothAnimations;
+        document.getElementById('gameSpeed').value = settings.gameSpeed;
+        document.getElementById('autoPause').checked = settings.autoPause;
+        document.getElementById('masterVolume').value = settings.masterVolume;
+        document.getElementById('enableSoundEffects').checked = settings.enableSoundEffects;
+        
+        // Update volume display
+        document.getElementById('masterVolumeValue').textContent = settings.masterVolume + '%';
+        
+        // Add volume slider event listener
+        const volumeSlider = document.getElementById('masterVolume');
+        volumeSlider.addEventListener('input', (e) => {
+            document.getElementById('masterVolumeValue').textContent = e.target.value + '%';
+        });
+    }
+
+    getGameSettings() {
+        const defaultSettings = {
+            showCharacterNames: true,
+            showActionIndicators: true,
+            enableSmoothAnimations: true,
+            gameSpeed: 1,
+            autoPause: false,
+            masterVolume: 50,
+            enableSoundEffects: true
+        };
+
+        try {
+            const savedSettings = localStorage.getItem('tribesGameSettings');
+            return savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings;
+        } catch (e) {
+            console.warn('Failed to load settings from localStorage:', e);
+            return defaultSettings;
+        }
+    }
+
+    saveGameSettings(settings) {
+        try {
+            localStorage.setItem('tribesGameSettings', JSON.stringify(settings));
+        } catch (e) {
+            console.warn('Failed to save settings to localStorage:', e);
+        }
+    }
+
+    applySettings() {
+        const settings = {
+            showCharacterNames: document.getElementById('showCharacterNames').checked,
+            showActionIndicators: document.getElementById('showActionIndicators').checked,
+            enableSmoothAnimations: document.getElementById('enableSmoothAnimations').checked,
+            gameSpeed: parseFloat(document.getElementById('gameSpeed').value),
+            autoPause: document.getElementById('autoPause').checked,
+            masterVolume: parseInt(document.getElementById('masterVolume').value),
+            enableSoundEffects: document.getElementById('enableSoundEffects').checked
+        };
+
+        this.saveGameSettings(settings);
+        
+        // Apply settings to game state
+        if (this.gameState) {
+            this.gameState.settings = settings;
+            // Update game speed if game loop exists
+            if (window.gameLoop && window.gameLoop.setSpeed) {
+                window.gameLoop.setSpeed(settings.gameSpeed);
+            }
+        }
+
+        // Show confirmation and go back
+        alert('Settings saved successfully!');
+        this.showStartScreen();
     }
 }

@@ -1,6 +1,25 @@
 import { ACTION_TYPES, CHARACTER_STATES, TERRAIN_TYPES } from './constants.js';
 import { enableSwimmingForCharacter, enableClimbingForCharacter } from './pathfinding.js';
 
+// Character demographics data
+const CHARACTER_NAMES = {
+    male: [
+        'Aiden', 'Blake', 'Cael', 'Doran', 'Ethan', 'Finn', 'Gavin', 'Hunter', 'Ian', 'Jack',
+        'Kane', 'Luke', 'Max', 'Noah', 'Owen', 'Paul', 'Quinn', 'Ryan', 'Sam', 'Tyler',
+        'Ash', 'Bear', 'Clay', 'Drake', 'Fox', 'Gray', 'Hawk', 'Iron', 'Jay', 'Knox'
+    ],
+    female: [
+        'Aria', 'Beth', 'Cora', 'Dana', 'Eva', 'Faye', 'Grace', 'Hope', 'Ivy', 'Jane',
+        'Kate', 'Luna', 'Maya', 'Nora', 'Olive', 'Piper', 'Quinn', 'Rose', 'Sage', 'Tara',
+        'Alba', 'Briar', 'Cleo', 'Dawn', 'Echo', 'Fern', 'Gaia', 'Hazel', 'Iris', 'Jade'
+    ]
+};
+
+const ETHNICITIES = [
+    'Nordic', 'Celtic', 'Mediterranean', 'Slavic', 'Germanic', 'Iberian', 
+    'Anglo', 'Gallic', 'Balkan', 'Alpine', 'Steppe', 'Coastal', 'Mountain', 'Desert'
+];
+
 export class Character {
     constructor(id, x, y) {
         this.id = id;
@@ -15,7 +34,30 @@ export class Character {
         this.skills = new Map();
         this.traits = new Map();
         this.needs = new Map();
+        
+        // Generate character demographics
+        this.gender = Math.random() < 0.5 ? 'male' : 'female';
+        this.age = Math.floor(Math.random() * 100) + 1; // 1-100 years
+        this.ethnicity = ETHNICITIES[Math.floor(Math.random() * ETHNICITIES.length)];
+        this.name = this.generateName();
+        
         this.initializeCharacterSystems();
+    }
+
+    generateName() {
+        const nameList = CHARACTER_NAMES[this.gender];
+        if (!nameList || nameList.length === 0) {
+            return `Character${this.id}`; // Fallback name
+        }
+        return nameList[Math.floor(Math.random() * nameList.length)];
+    }
+
+    generateEthnicity() {
+        return ETHNICITIES[Math.floor(Math.random() * ETHNICITIES.length)];
+    }
+
+    generateAge() {
+        return Math.floor(Math.random() * 60) + 18; // Age between 18 and 77
     }
 
     initializeCharacterSystems() {

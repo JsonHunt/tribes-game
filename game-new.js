@@ -5,6 +5,7 @@ import { MapGenerator, MapObjectManager } from './map.js';
 import { GameState } from './game-state.js';
 import { UIManager } from './ui-manager.js';
 import { GameLoop } from './game-loop.js';
+import { ControlsManager } from './controls.js';
 import GAME_CONFIG from './config.js';
 
 // Global game instances
@@ -14,6 +15,7 @@ let characterManager;
 let mapObjectManager;
 let uiManager;
 let gameLoop;
+let controlsManager;
 
 // Initialize the game systems
 function initializeGame() {
@@ -23,10 +25,19 @@ function initializeGame() {
     mapObjectManager = new MapObjectManager();
     uiManager = new UIManager(gameState);
     gameLoop = new GameLoop();
-      // Make pathfinding system globally available for character updates
+    controlsManager = new ControlsManager(gameState, uiManager);
+    
+    // Make pathfinding system globally available for character updates
     window.pathfindingSystem = pathfindingSystem;
     window.gameState = gameState;
+    window.gameLoop = gameLoop;
+    window.characterManager = characterManager;
+    window.mapObjectManager = mapObjectManager;
+    window.uiManager = uiManager;
     window.GAME_CONFIG = GAME_CONFIG;
+    
+    // Initialize controls
+    controlsManager.initialize();
 }
 
 // Game configuration and initialization
@@ -62,6 +73,11 @@ function beginGame() {
     
     // Start the game loop
     gameLoop.start(gameState, characterManager, mapObjectManager, uiManager);
+    
+    // Apply saved settings if any
+    if (gameState.settings && gameState.settings.gameSpeed) {
+        gameLoop.setSpeed(gameState.settings.gameSpeed);
+    }
 }
 
 // Initialize pathfinding system for the current game
@@ -111,6 +127,10 @@ function hideCharacterInfo() {
     uiManager.hideCharacterInfo();
 }
 
+function applySettings() {
+    uiManager.applySettings();
+}
+
 // Make functions globally accessible for HTML onclick handlers
 window.beginGame = beginGame;
 window.showStartScreen = showStartScreen;
@@ -122,11 +142,14 @@ window.exitGame = exitGame;
 window.zoomIn = zoomIn;
 window.zoomOut = zoomOut;
 window.hideCharacterInfo = hideCharacterInfo;
+window.applySettings = applySettings;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing game...');
     initializeGame();
     
     // Set focus to the window for keyboard controls
     window.focus();
+    console.log('Game initialization complete');
 });
