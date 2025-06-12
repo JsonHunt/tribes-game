@@ -3,105 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Tribes Game</title>
+    <title>Tribes Game</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .screen.active {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
-        
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-        
-        .game-area {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px 0;
-            min-height: 200px;
-            display: flex;
+
+        /* Start Screen Styles */
+        .start-screen {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
-        button {
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            color: white;
-            font-size: 1.1rem;
+
+        .game-title {
+            font-size: 4rem;
             font-weight: bold;
+            margin-bottom: 3rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .menu-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            margin: 10px;
+            font-size: 1.2rem;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            min-width: 200px;
         }
-        
-        button:hover {
+
+        .menu-button:hover {
+            background: linear-gradient(45deg, #ff8e8e, #ff7575);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
         }
-        
-        #status {
+
+        /* New Game Screen Styles */
+        .new-game-screen {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .config-panel {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .config-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .config-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .config-label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-size: 1.1rem;
-            margin-top: 20px;
+            font-weight: bold;
+        }        .config-input {
+            width: 100%;
             padding: 10px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            outline: none;
+            pointer-events: auto;
+        }
+
+        .config-input:focus {
+            background: rgba(255,255,255,1);
+            box-shadow: 0 0 0 2px #3498db;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .secondary-button {
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+        }
+
+        .secondary-button:hover {
+            background: linear-gradient(45deg, #bdc3c7, #95a5a6);
+        }
+
+        /* Gameplay Screen Styles */
+        .gameplay-screen {
+            flex-direction: column;
+            background: #2c3e50;
+        }
+
+        .game-header {
+            height: 60px;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            justify-content: space-between;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .info-item {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .game-viewport {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-map {
+            position: absolute;
+            display: grid;
+            transition: transform 0.1s ease;
+        }
+
+        .terrain-tile {
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .terrain-grass { background-color: #27ae60; }
+        .terrain-rock { background-color: #7f8c8d; }
+        .terrain-water { background-color: #3498db; }
+        .terrain-snow { background-color: #ecf0f1; }
+        .terrain-sand { background-color: #f39c12; }
+
+        .game-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .control-info {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .zoom-button {
+            background: #3498db;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .zoom-button:hover {
+            background: #2980b9;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏛️ Simple Tribes Game</h1>
-        <p>Welcome to your tribal civilization!</p>
-        
-        <div class="game-area">
-            <h2>Tribe Status</h2>
-            <div id="status">
-                <div>Population: <span id="population">10</span></div>
-                <div>Resources: <span id="resources">50</span></div>
-                <div>Happiness: <span id="happiness">75</span>%</div>
-            </div>
-            
-            <div style="margin-top: 20px;">
-                <button onclick="gatherResources()">🌾 Gather Resources</button>
-                <button onclick="expandTribe()">👥 Expand Tribe</button>
-                <button onclick="celebrateFestival()">🎉 Hold Festival</button>
-            </div>
-        </div>
-        
-        <div id="messages" style="margin-top: 20px; min-height: 50px;">
-            <p>Click the buttons above to grow your tribe!</p>
+    <!-- Start Screen -->
+    <div class="screen start-screen active" id="startScreen">
+        <h1 class="game-title">TRIBES</h1>
+        <div class="menu">
+            <button class="menu-button" onclick="showNewGameScreen()">Start New Game</button>
+            <button class="menu-button" onclick="loadGame()">Load Game</button>
+            <button class="menu-button" onclick="showSettings()">Settings</button>
+            <button class="menu-button" onclick="exitGame()">Exit</button>
         </div>
     </div>
-    
-    <script src="renderer.js"></script>
+
+    <!-- New Game Configuration Screen -->
+    <div class="screen new-game-screen" id="newGameScreen">
+        <div class="config-panel">
+            <h2 class="config-title">New Game Configuration</h2>
+            <div class="config-group">
+                <label class="config-label" for="worldSizeX">World Width:</label>
+                <input type="number" class="config-input" id="worldSizeX" value="50" min="10" max="200">
+            </div>
+            <div class="config-group">
+                <label class="config-label" for="worldSizeY">World Height:</label>
+                <input type="number" class="config-input" id="worldSizeY" value="50" min="10" max="200">
+            </div>
+            <div class="config-group">
+                <label class="config-label" for="tribeSize">Tribe Size:</label>
+                <input type="number" class="config-input" id="tribeSize" value="10" min="5" max="100">
+            </div>
+            <div class="button-group">
+                <button class="menu-button secondary-button" onclick="showStartScreen()">Back</button>
+                <button class="menu-button" onclick="beginGame()">Begin Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Gameplay Screen -->
+    <div class="screen gameplay-screen" id="gameplayScreen">
+        <div class="game-header">
+            <div class="game-info">
+                <div class="info-item">World: <span id="worldSize">0x0</span></div>
+                <div class="info-item">Tribe Size: <span id="currentTribeSize">0</span></div>
+                <div class="info-item">Zoom: <span id="zoomLevel">100%</span></div>
+            </div>
+            <button class="menu-button secondary-button" onclick="showStartScreen()">Main Menu</button>
+        </div>
+        <div class="game-viewport" id="gameViewport">
+            <div class="game-map" id="gameMap"></div>
+        </div>
+        <div class="game-controls">
+            <div class="control-info">Use arrow keys to scroll</div>
+            <div class="control-info">Mouse wheel to zoom</div>
+            <div class="zoom-controls">
+                <button class="zoom-button" onclick="zoomOut()">-</button>
+                <button class="zoom-button" onclick="zoomIn()">+</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
 </body>
 </html>

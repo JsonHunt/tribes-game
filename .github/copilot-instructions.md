@@ -30,3 +30,16 @@ The game includes:
 - Modern button designs with hover animations
 - Responsive layout that works on different screen sizes
 - Color scheme: purple/blue gradients with accent colors
+
+When given a list of tasks, execute them one by one in provided order.
+
+## Programming tasks
+- Create a separate branch for each task and commit after successfully completing it.
+- Do not create try catch blocks unless specifically requested.
+- Prefer using await async over .then
+- Do not run the app to verify if it works.
+- keep the code clean and well-commented
+- Use meaningful variable and function names
+- Keep the code modular and organized
+- Use ES6+ features like arrow functions, destructuring, and template literals
+- keep css, js and html code in separate files
