@@ -10,7 +10,11 @@ export const TERRAIN_TYPES = {
 // Character action types
 export const ACTION_TYPES = {
     MOVE_TO: 'move_to',
-    WAIT: 'wait'
+    WAIT: 'wait',
+    DRINK: 'drink',
+    EAT: 'eat',
+    REST: 'rest',
+    SOCIALIZE: 'socialize'
 };
 
 // Character states

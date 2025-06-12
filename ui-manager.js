@@ -158,10 +158,36 @@ export class UIManager {
                 charElement.className = 'character';
                 charElement.style.width = `${currentTileSize * 0.8}px`;
                 charElement.style.height = `${currentTileSize * 0.8}px`;
-                
-                // Color based on character state
+                  // Color based on character's most urgent need
                 let color = '#e74c3c'; // Default red
-                if (character.state === CHARACTER_STATES.MOVING) {
+                let urgentNeed = null;
+                
+                if (character.getMostUrgentNeed) {
+                    urgentNeed = character.getMostUrgentNeed();
+                }
+                
+                if (urgentNeed) {
+                    switch (urgentNeed.name) {
+                        case 'thirst':
+                            color = '#3498db'; // Blue for thirst
+                            break;
+                        case 'hunger':
+                            color = '#e67e22'; // Orange for hunger
+                            break;
+                        case 'rest':
+                            color = '#9b59b6'; // Purple for rest
+                            break;
+                        case 'safety':
+                            color = '#e74c3c'; // Red for safety
+                            break;
+                        case 'social':
+                            color = '#f39c12'; // Yellow for social
+                            break;
+                        default:
+                            color = '#27ae60'; // Green for content/other needs
+                            break;
+                    }
+                } else if (character.state === CHARACTER_STATES.MOVING) {
                     color = '#f39c12'; // Orange for moving
                 } else if (character.state === CHARACTER_STATES.WAITING) {
                     color = '#9b59b6'; // Purple for waiting
@@ -180,16 +206,46 @@ export class UIManager {
                 charElement.style.zIndex = '10';
                 charElement.dataset.characterId = character.id;
                 
-                // Add action indicator
-                if (character.currentAction && character.currentAction.type === ACTION_TYPES.MOVE_TO) {
-                    charElement.style.boxShadow = '0 0 8px rgba(243, 156, 18, 0.6)';
-                    
-                    // Optional: Add path visualization (for debugging)
-                    if (this.gameState.showPaths && character.currentAction.path) {
-                        charElement.style.border = '2px solid rgba(243, 156, 18, 0.8)';
+                // Add click event to show character info
+                charElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showCharacterInfo(character);
+                });
+                  // Add action indicator with enhanced visual feedback
+                if (character.currentAction) {
+                    switch (character.currentAction.type) {
+                        case ACTION_TYPES.MOVE_TO:
+                            charElement.style.boxShadow = '0 0 8px rgba(243, 156, 18, 0.6)';
+                            if (this.gameState.showPaths && character.currentAction.path) {
+                                charElement.style.border = '2px solid rgba(243, 156, 18, 0.8)';
+                            }
+                            break;
+                        case ACTION_TYPES.DRINK:
+                            charElement.style.boxShadow = '0 0 8px rgba(52, 152, 219, 0.8)';
+                            charElement.style.border = '2px solid rgba(52, 152, 219, 0.6)';
+                            break;
+                        case ACTION_TYPES.EAT:
+                            charElement.style.boxShadow = '0 0 8px rgba(230, 126, 34, 0.8)';
+                            charElement.style.border = '2px solid rgba(230, 126, 34, 0.6)';
+                            break;
+                        case ACTION_TYPES.REST:
+                            charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.8)';
+                            charElement.style.border = '2px solid rgba(155, 89, 182, 0.6)';
+                            break;
+                        case ACTION_TYPES.WAIT:
+                            charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.6)';
+                            break;
+                        default:
+                            charElement.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.3)';
+                            break;
                     }
-                } else if (character.currentAction && character.currentAction.type === ACTION_TYPES.WAIT) {
-                    charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.6)';
+                }
+                
+                // Add tooltip with character information
+                if (urgentNeed) {
+                    charElement.title = `Character ${character.id}\nMost urgent need: ${urgentNeed.name} (${Math.round(urgentNeed.satisfaction)}%)\nAction: ${character.currentAction ? character.currentAction.type : 'idle'}`;
+                } else {
+                    charElement.title = `Character ${character.id}\nAction: ${character.currentAction ? character.currentAction.type : 'idle'}`;
                 }
                 
                 tile.appendChild(charElement);
@@ -376,9 +432,7 @@ export class UIManager {
 
         // Set initial cursor style
         viewport.style.cursor = 'grab';
-    }
-
-    setupWindowEvents() {
+    }    setupWindowEvents() {
         // Window resize handler
         window.addEventListener('resize', () => {
             if (this.gameState.currentScreen === 'gameplayScreen') {
@@ -388,5 +442,109 @@ export class UIManager {
 
         // Set focus to the window for keyboard controls
         window.focus();
+    }
+
+    // Character info panel methods
+    showCharacterInfo(character) {
+        const panel = document.getElementById('characterInfoPanel');
+        const characterIdSpan = document.getElementById('selectedCharacterId');
+        const currentNeedDiv = document.getElementById('currentNeed');
+        const needsList = document.getElementById('needsList');
+        const skillsList = document.getElementById('skillsList');
+        const traitsList = document.getElementById('traitsList');
+
+        if (!panel) return;
+
+        // Update character ID
+        if (characterIdSpan) {
+            characterIdSpan.textContent = character.id;
+        }
+
+        // Update current most urgent need
+        if (currentNeedDiv && character.getMostUrgentNeed) {
+            const urgentNeed = character.getMostUrgentNeed();
+            if (urgentNeed) {
+                currentNeedDiv.innerHTML = `<strong>${urgentNeed.name}</strong> (${Math.round(urgentNeed.satisfaction)}%)`;
+                currentNeedDiv.style.color = this.getNeedColor(urgentNeed.satisfaction);
+            } else {
+                currentNeedDiv.textContent = 'Content';
+                currentNeedDiv.style.color = '#27ae60';
+            }
+        }
+
+        // Update needs list
+        if (needsList && character.needs) {
+            needsList.innerHTML = '';
+            const sortedNeeds = Array.from(character.needs.entries())
+                .sort((a, b) => a[1].priority - b[1].priority);
+
+            sortedNeeds.forEach(([needName, need]) => {
+                const needItem = document.createElement('div');
+                needItem.className = 'need-item';
+                
+                const satisfaction = Math.round(need.satisfaction);
+                needItem.innerHTML = `
+                    <span>${needName}</span>
+                    <div class="need-bar">
+                        <div class="need-fill" style="width: ${satisfaction}%"></div>
+                    </div>
+                `;
+                needsList.appendChild(needItem);
+            });
+        }
+
+        // Update skills list
+        if (skillsList && character.skills) {
+            skillsList.innerHTML = '';
+            const sortedSkills = Array.from(character.skills.entries())
+                .sort((a, b) => b[1] - a[1]); // Sort by skill level, highest first
+
+            sortedSkills.forEach(([skillName, level]) => {
+                const skillItem = document.createElement('div');
+                skillItem.className = 'skill-item';
+                
+                skillItem.innerHTML = `
+                    <span>${skillName}</span>
+                    <div class="skill-bar">
+                        <div class="skill-fill" style="width: ${level}%"></div>
+                    </div>
+                `;
+                skillsList.appendChild(skillItem);
+            });
+        }
+
+        // Update traits list
+        if (traitsList && character.traits) {
+            traitsList.innerHTML = '';
+            const sortedTraits = Array.from(character.traits.entries())
+                .sort((a, b) => b[1] - a[1]); // Sort by trait strength
+
+            sortedTraits.forEach(([traitName, strength]) => {
+                const traitItem = document.createElement('div');
+                traitItem.className = 'trait-item';
+                traitItem.innerHTML = `<span>${traitName}</span><span>${'★'.repeat(strength)}</span>`;
+                traitsList.appendChild(traitItem);
+            });
+
+            if (sortedTraits.length === 0) {
+                traitsList.innerHTML = '<div style="color: #7f8c8d; font-style: italic;">No notable traits</div>';
+            }
+        }
+
+        // Show the panel
+        panel.style.display = 'block';
+    }
+
+    hideCharacterInfo() {
+        const panel = document.getElementById('characterInfoPanel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+    }
+
+    getNeedColor(satisfaction) {
+        if (satisfaction < 30) return '#e74c3c'; // Red for critical
+        if (satisfaction < 60) return '#f39c12'; // Orange for low
+        return '#27ae60'; // Green for satisfied
     }
 }

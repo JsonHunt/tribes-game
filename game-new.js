@@ -107,6 +107,10 @@ function zoomOut() {
     uiManager.zoomOut();
 }
 
+function hideCharacterInfo() {
+    uiManager.hideCharacterInfo();
+}
+
 // Make functions globally accessible for HTML onclick handlers
 window.beginGame = beginGame;
 window.showStartScreen = showStartScreen;
@@ -117,6 +121,7 @@ window.showSettings = showSettings;
 window.exitGame = exitGame;
 window.zoomIn = zoomIn;
 window.zoomOut = zoomOut;
+window.hideCharacterInfo = hideCharacterInfo;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
