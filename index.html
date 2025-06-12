@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Tribes Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .game-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #status {
+            font-size: 1.1rem;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ Simple Tribes Game</h1>
+        <p>Welcome to your tribal civilization!</p>
+        
+        <div class="game-area">
+            <h2>Tribe Status</h2>
+            <div id="status">
+                <div>Population: <span id="population">10</span></div>
+                <div>Resources: <span id="resources">50</span></div>
+                <div>Happiness: <span id="happiness">75</span>%</div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button onclick="gatherResources()">🌾 Gather Resources</button>
+                <button onclick="expandTribe()">👥 Expand Tribe</button>
+                <button onclick="celebrateFestival()">🎉 Hold Festival</button>
+            </div>
+        </div>
+        
+        <div id="messages" style="margin-top: 20px; min-height: 50px;">
+            <p>Click the buttons above to grow your tribe!</p>
+        </div>
+    </div>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>

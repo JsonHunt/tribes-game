@@ -1,0 +1,18 @@
+{
+  "name": "simple-tribes-game",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["electron", "game", "tribes"],
+  "author": "",
+  "license": "ISC",
+  "description": "A simple tribes civilization game built with Electron",
+  "devDependencies": {
+    "electron": "^36.4.0"
+  }
+}
