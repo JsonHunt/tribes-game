@@ -181,6 +181,15 @@
             border-radius: 2px;
             border: 1px solid #c0392b;
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }        .zoom-controls-overlay {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem;
+            border-radius: 8px;
         }
 
         .game-controls {
@@ -268,19 +277,13 @@
                 <div class="info-item">Zoom: <span id="zoomLevel">100%</span></div>
             </div>
             <button class="menu-button secondary-button" onclick="showStartScreen()">Main Menu</button>
-        </div>
-        <div class="game-viewport" id="gameViewport">
+        </div>        <div class="game-viewport" id="gameViewport">
             <div class="game-map" id="gameMap"></div>
-        </div>        <div class="game-controls">
-            <div class="control-info">Use arrow keys to scroll</div>
-            <div class="control-info">Drag with mouse to move map</div>
-            <div class="control-info">Mouse wheel to zoom</div>
-            <div class="control-info">Characters: Red=idle, Orange=moving, Purple=waiting</div>
-            <div class="zoom-controls">
+            <div class="zoom-controls-overlay">
                 <button class="zoom-button" onclick="zoomOut()">-</button>
                 <button class="zoom-button" onclick="zoomIn()">+</button>
             </div>
-        </div>    </div>    <script src="config.js"></script>
+        </div></div>    <script src="config.js"></script>
     <script src="biome-generator.js"></script>
     <script src="game.js"></script>
 </body>
