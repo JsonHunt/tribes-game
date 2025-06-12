@@ -30,7 +30,5 @@ const GAME_CONFIG = {
     }
 };
 
-// Export for use in main game file
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GAME_CONFIG;
-}
+// Export for ES6 modules
+export default GAME_CONFIG;

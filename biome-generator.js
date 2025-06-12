@@ -236,10 +236,5 @@ class BiomeGeneratorFactory {
     }
 }
 
-// Export for use in main game file
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        BIOME_ALGORITHMS,
-        BiomeGeneratorFactory
-    };
-}
+// Export for ES6 modules
+export { BIOME_ALGORITHMS, BiomeGeneratorFactory };
