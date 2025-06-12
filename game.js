@@ -7,7 +7,13 @@ let gameState = {
     map: [],
     mapPosition: { x: 0, y: 0 },
     zoomLevel: 1,
-    tileSize: 20
+    tileSize: 20,
+    biomeAlgorithm: 'cluster', // Default biome generation algorithm
+    characters: [], // Array to store character positions
+    isDragging: false, // Mouse drag state
+    lastMousePos: { x: 0, y: 0 }, // Last mouse position for dragging
+    gameLoop: null, // Game loop interval
+    lastUpdate: Date.now() // Last update timestamp
 };
 
 // Terrain types
@@ -17,6 +23,19 @@ const TERRAIN_TYPES = {
     WATER: 'water',
     SNOW: 'snow',
     SAND: 'sand'
+};
+
+// Character action types
+const ACTION_TYPES = {
+    MOVE_TO: 'move_to',
+    WAIT: 'wait'
+};
+
+// Character states
+const CHARACTER_STATES = {
+    IDLE: 'idle',
+    MOVING: 'moving',
+    WAITING: 'waiting'
 };
 
 // Biome definitions
@@ -62,6 +81,8 @@ function showScreen(screenId) {
 
 function showStartScreen() {
     showScreen('startScreen');
+    // Stop game loop when returning to start screen
+    stopGameLoop();
 }
 
 function showNewGameScreen() {
@@ -111,6 +132,7 @@ function beginGame() {
     gameState.worldWidth = parseInt(document.getElementById('worldSizeX').value);
     gameState.worldHeight = parseInt(document.getElementById('worldSizeY').value);
     gameState.tribeSize = parseInt(document.getElementById('tribeSize').value);
+    gameState.biomeAlgorithm = document.getElementById('biomeAlgorithm').value;
     
     // Validate inputs
     if (gameState.worldWidth < 10 || gameState.worldWidth > 200 ||
@@ -119,9 +141,9 @@ function beginGame() {
         alert('Please enter valid values within the specified ranges.');
         return;
     }
-    
-    // Initialize the game
+      // Initialize the game
     generateMap();
+    generateCharacters();
     updateGameInfo();
     showGameplayScreen();
     
@@ -129,6 +151,9 @@ function beginGame() {
     gameState.mapPosition = { x: 0, y: 0 };
     gameState.zoomLevel = 1;
     renderMap();
+    
+    // Start the game loop
+    startGameLoop();
 }
 
 // Map generation
@@ -143,126 +168,17 @@ function generateMap() {
         }
     }
     
-    // Generate biomes
-    generateBiomes();
-}
-
-function generateBiomes() {
-    const biomeTypes = Object.keys(BIOMES);
-    const numBiomes = Math.floor((gameState.worldWidth * gameState.worldHeight) / 400) + 3; // Roughly 1 biome per 400 tiles, minimum 3
-    
-    // Create biome seeds (starting points)
-    const biomeSeeds = [];
-    for (let i = 0; i < numBiomes; i++) {
-        const biomeType = biomeTypes[Math.floor(Math.random() * biomeTypes.length)];
-        const seed = {
-            x: Math.floor(Math.random() * gameState.worldWidth),
-            y: Math.floor(Math.random() * gameState.worldHeight),
-            type: biomeType,
-            size: Math.floor(Math.random() * 200) + 50 // Random size between 50-250 tiles
-        };
-        biomeSeeds.push(seed);
-    }
-    
-    // Grow biomes from seeds using flood-fill-like algorithm
-    for (const seed of biomeSeeds) {
-        growBiome(seed);
-    }
-    
-    // Fill any remaining null tiles with random terrain
-    fillRemainingTiles();
-}
-
-function growBiome(seed) {
-    const visited = new Set();
-    const queue = [{ x: seed.x, y: seed.y, distance: 0 }];
-    const biome = BIOMES[seed.type];
-    let tilesPlaced = 0;
-    
-    while (queue.length > 0 && tilesPlaced < seed.size) {
-        const current = queue.shift();
-        const key = `${current.x},${current.y}`;
-        
-        if (visited.has(key) || 
-            current.x < 0 || current.x >= gameState.worldWidth ||
-            current.y < 0 || current.y >= gameState.worldHeight ||
-            gameState.map[current.y][current.x] !== null) {
-            continue;
-        }
-        
-        visited.add(key);
-        
-        // Place terrain based on biome probabilities
-        const terrain = selectTerrainFromBiome(biome);
-        gameState.map[current.y][current.x] = terrain;
-        tilesPlaced++;
-        
-        // Add neighboring tiles to queue with some randomness for irregular shapes
-        const neighbors = getRandomizedNeighbors(current.x, current.y);
-        for (const neighbor of neighbors) {
-            const distanceFromSeed = Math.sqrt(
-                (neighbor.x - seed.x) ** 2 + (neighbor.y - seed.y) ** 2
-            );
-            
-            // Use distance and randomness to create irregular shapes
-            const growthProbability = Math.max(0, 1 - (distanceFromSeed / (seed.size / 10))) * Math.random();
-            
-            if (growthProbability > 0.3) { // Threshold for growth
-                queue.push({ x: neighbor.x, y: neighbor.y, distance: current.distance + 1 });
-            }
-        }
-    }
-}
-
-function selectTerrainFromBiome(biome) {
-    const rand = Math.random();
-    let cumulativeProbability = 0;
-    
-    for (const [terrain, probability] of Object.entries(biome.probability)) {
-        cumulativeProbability += probability;
-        if (rand <= cumulativeProbability) {
-            return terrain;
-        }
-    }
-    
-    return biome.primaryTerrain; // Fallback
-}
-
-function getRandomizedNeighbors(x, y) {
-    const neighbors = [
-        { x: x + 1, y: y },
-        { x: x - 1, y: y },
-        { x: x, y: y + 1 },
-        { x: x, y: y - 1 }
-    ];
-    
-    // Sometimes include diagonal neighbors for more interesting shapes
-    if (Math.random() < 0.3) {
-        neighbors.push(
-            { x: x + 1, y: y + 1 },
-            { x: x + 1, y: y - 1 },
-            { x: x - 1, y: y + 1 },
-            { x: x - 1, y: y - 1 }
-        );
-    }
-    
-    // Shuffle the neighbors array for randomness
-    return neighbors.sort(() => Math.random() - 0.5);
-}
-
-function fillRemainingTiles() {
-    for (let y = 0; y < gameState.worldHeight; y++) {
-        for (let x = 0; x < gameState.worldWidth; x++) {
-            if (gameState.map[y][x] === null) {
-                // Use the old generation method for remaining tiles or pick random terrain
-                gameState.map[y][x] = generateTerrain(x, y);
-            }
-        }
-    }
+    // Generate biomes using selected algorithm
+    const generator = BiomeGeneratorFactory.createGenerator(
+        gameState.biomeAlgorithm,
+        TERRAIN_TYPES,
+        BIOMES
+    );
+    generator.generateBiomes(gameState);
 }
 
 function generateTerrain(x, y) {
-    // Simple terrain generation using noise-like patterns
+    // Simple terrain generation using noise-like patterns (fallback)
     const centerX = gameState.worldWidth / 2;
     const centerY = gameState.worldHeight / 2;
     const distanceFromCenter = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
@@ -283,6 +199,157 @@ function generateTerrain(x, y) {
         return Math.random() < 0.6 ? TERRAIN_TYPES.ROCK : TERRAIN_TYPES.SNOW;
     } else {
         return TERRAIN_TYPES.SNOW;
+    }
+}
+
+// Character generation
+function generateCharacters() {
+    gameState.characters = [];
+    
+    // Generate characters based on tribe size
+    for (let i = 0; i < gameState.tribeSize; i++) {
+        let x, y;
+        let attempts = 0;
+        
+        // Try to place characters on land (not water)
+        do {
+            x = Math.floor(Math.random() * gameState.worldWidth);
+            y = Math.floor(Math.random() * gameState.worldHeight);
+            attempts++;
+        } while (gameState.map[y][x] === TERRAIN_TYPES.WATER && attempts < 50);
+        
+        const character = {
+            id: i,
+            x: x,
+            y: y,
+            health: 100,
+            energy: 100,
+            state: CHARACTER_STATES.IDLE,
+            currentAction: null,
+            actionStartTime: 0,
+            actionProgress: 0
+        };
+        
+        // Assign initial action
+        assignRandomAction(character);
+        
+        gameState.characters.push(character);
+    }
+}
+
+// Character Action System
+function assignRandomAction(character) {
+    const actions = [ACTION_TYPES.MOVE_TO, ACTION_TYPES.WAIT];
+    const actionType = actions[Math.floor(Math.random() * actions.length)];
+    
+    if (actionType === ACTION_TYPES.MOVE_TO) {
+        // Choose a random target location
+        const targetX = Math.floor(Math.random() * gameState.worldWidth);
+        const targetY = Math.floor(Math.random() * gameState.worldHeight);
+        
+        character.currentAction = {
+            type: ACTION_TYPES.MOVE_TO,
+            targetX: targetX,
+            targetY: targetY,
+            moveSpeed: 0.5 // tiles per second
+        };
+        character.state = CHARACTER_STATES.MOVING;
+    } else {
+        // Wait action
+        character.currentAction = {
+            type: ACTION_TYPES.WAIT,
+            duration: 2000 // 2 seconds in milliseconds
+        };
+        character.state = CHARACTER_STATES.WAITING;
+    }
+    
+    character.actionStartTime = Date.now();
+    character.actionProgress = 0;
+}
+
+function updateCharacterActions(deltaTime) {
+    const currentTime = Date.now();
+    
+    for (const character of gameState.characters) {
+        if (!character.currentAction) {
+            assignRandomAction(character);
+            continue;
+        }
+        
+        const actionElapsed = currentTime - character.actionStartTime;
+        
+        if (character.currentAction.type === ACTION_TYPES.MOVE_TO) {
+            updateMoveAction(character, actionElapsed, deltaTime);
+        } else if (character.currentAction.type === ACTION_TYPES.WAIT) {
+            updateWaitAction(character, actionElapsed);
+        }
+    }
+}
+
+function updateMoveAction(character, elapsed, deltaTime) {
+    const action = character.currentAction;
+    const dx = action.targetX - character.x;
+    const dy = action.targetY - character.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance < 0.1) {
+        // Reached target
+        character.x = action.targetX;
+        character.y = action.targetY;
+        character.currentAction = null;
+        character.state = CHARACTER_STATES.IDLE;
+        assignRandomAction(character);
+        return;
+    }
+    
+    // Move towards target
+    const moveDistance = action.moveSpeed * (deltaTime / 1000); // Convert to seconds
+    const moveRatio = Math.min(moveDistance / distance, 1);
+    
+    character.x += dx * moveRatio;
+    character.y += dy * moveRatio;
+    
+    // Keep character within map bounds
+    character.x = Math.max(0, Math.min(gameState.worldWidth - 1, character.x));
+    character.y = Math.max(0, Math.min(gameState.worldHeight - 1, character.y));
+}
+
+function updateWaitAction(character, elapsed) {
+    const action = character.currentAction;
+    
+    if (elapsed >= action.duration) {
+        // Wait completed
+        character.currentAction = null;
+        character.state = CHARACTER_STATES.IDLE;
+        assignRandomAction(character);
+    }
+}
+
+// Game loop
+function startGameLoop() {
+    if (gameState.gameLoop) {
+        clearInterval(gameState.gameLoop);
+    }
+    
+    gameState.lastUpdate = Date.now();
+    
+    gameState.gameLoop = setInterval(() => {
+        const currentTime = Date.now();
+        const deltaTime = currentTime - gameState.lastUpdate;
+        gameState.lastUpdate = currentTime;
+        
+        // Update character actions
+        updateCharacterActions(deltaTime);
+        
+        // Re-render map to show updated character positions
+        renderMap();
+    }, 100); // Update every 100ms
+}
+
+function stopGameLoop() {
+    if (gameState.gameLoop) {
+        clearInterval(gameState.gameLoop);
+        gameState.gameLoop = null;
     }
 }
 
@@ -312,6 +379,51 @@ function renderMap() {
             // Add coordinates as data attributes for potential future use
             tile.dataset.x = x;
             tile.dataset.y = y;
+              // Check if there's a character on this tile (or nearby due to fractional positions)
+            const charactersOnTile = gameState.characters.filter(char => {
+                const charTileX = Math.floor(char.x);
+                const charTileY = Math.floor(char.y);
+                return charTileX === x && charTileY === y;
+            });
+            
+            if (charactersOnTile.length > 0) {
+                charactersOnTile.forEach(character => {
+                    const charElement = document.createElement('div');
+                    charElement.className = 'character';
+                    charElement.style.width = `${currentTileSize * 0.8}px`;
+                    charElement.style.height = `${currentTileSize * 0.8}px`;
+                    
+                    // Color based on character state
+                    let color = '#e74c3c'; // Default red
+                    if (character.state === CHARACTER_STATES.MOVING) {
+                        color = '#f39c12'; // Orange for moving
+                    } else if (character.state === CHARACTER_STATES.WAITING) {
+                        color = '#9b59b6'; // Purple for waiting
+                    }
+                    
+                    charElement.style.backgroundColor = color;
+                    charElement.style.position = 'absolute';
+                    
+                    // Calculate precise position within the tile
+                    const offsetX = (character.x - Math.floor(character.x)) * currentTileSize;
+                    const offsetY = (character.y - Math.floor(character.y)) * currentTileSize;
+                    
+                    charElement.style.top = `${currentTileSize * 0.1 + offsetY}px`;
+                    charElement.style.left = `${currentTileSize * 0.1 + offsetX}px`;
+                    charElement.style.borderRadius = '2px';
+                    charElement.style.zIndex = '10';
+                    charElement.dataset.characterId = character.id;
+                    
+                    // Add action indicator
+                    if (character.currentAction && character.currentAction.type === ACTION_TYPES.MOVE_TO) {
+                        charElement.style.boxShadow = '0 0 8px rgba(243, 156, 18, 0.6)';
+                    } else if (character.currentAction && character.currentAction.type === ACTION_TYPES.WAIT) {
+                        charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.6)';
+                    }
+                    
+                    tile.appendChild(charElement);
+                });
+            }
             
             gameMap.appendChild(tile);
         }
@@ -368,12 +480,33 @@ function scrollMap(deltaX, deltaY) {
     let newX = gameState.mapPosition.x + deltaX;
     let newY = gameState.mapPosition.y + deltaY;
     
-    // Clamp to boundaries
-    const maxX = Math.max(0, viewportWidth - mapWidth);
-    const maxY = Math.max(0, viewportHeight - mapHeight);
+    // Calculate proper boundaries to allow full map exploration
+    // When map is larger than viewport, allow scrolling to show all parts
+    let minX, maxX, minY, maxY;
     
-    newX = Math.min(0, Math.max(maxX, newX));
-    newY = Math.min(0, Math.max(maxY, newY));
+    if (mapWidth > viewportWidth) {
+        // Map is wider than viewport - allow horizontal scrolling
+        minX = viewportWidth - mapWidth; // Minimum position (shows right edge of map)
+        maxX = 0; // Maximum position (shows left edge of map)
+    } else {
+        // Map fits within viewport - center it
+        const centerOffset = (viewportWidth - mapWidth) / 2;
+        minX = maxX = centerOffset;
+    }
+    
+    if (mapHeight > viewportHeight) {
+        // Map is taller than viewport - allow vertical scrolling
+        minY = viewportHeight - mapHeight; // Minimum position (shows bottom edge of map)
+        maxY = 0; // Maximum position (shows top edge of map)
+    } else {
+        // Map fits within viewport - center it
+        const centerOffset = (viewportHeight - mapHeight) / 2;
+        minY = maxY = centerOffset;
+    }
+    
+    // Clamp to calculated boundaries
+    newX = Math.min(maxX, Math.max(minX, newX));
+    newY = Math.min(maxY, Math.max(minY, newY));
     
     gameState.mapPosition.x = newX;
     gameState.mapPosition.y = newY;
@@ -382,7 +515,8 @@ function scrollMap(deltaX, deltaY) {
 }
 
 // Event listeners
-document.addEventListener('DOMContentLoaded', function() {    // Keyboard controls for map scrolling - attach to window for better focus handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Keyboard controls for map scrolling - attach to window for better focus handling
     window.addEventListener('keydown', function(event) {
         // Don't handle keyboard events if user is typing in an input field
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
@@ -410,8 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {    // Keyboard contro
                 event.preventDefault();
                 scrollMap(-scrollSpeed, 0);
                 break;
-        }
-    });
+        }    });
     
     // Mouse wheel zoom
     document.getElementById('gameViewport').addEventListener('wheel', function(event) {
@@ -423,6 +556,46 @@ document.addEventListener('DOMContentLoaded', function() {    // Keyboard contro
             zoomOut();
         }
     });
+
+    // Mouse drag functionality
+    const viewport = document.getElementById('gameViewport');
+    
+    viewport.addEventListener('mousedown', function(event) {
+        if (event.button === 0) { // Left mouse button
+            gameState.isDragging = true;
+            gameState.lastMousePos = { x: event.clientX, y: event.clientY };
+            viewport.style.cursor = 'grabbing';
+            event.preventDefault();
+        }
+    });
+
+    viewport.addEventListener('mousemove', function(event) {
+        if (gameState.isDragging) {
+            const deltaX = event.clientX - gameState.lastMousePos.x;
+            const deltaY = event.clientY - gameState.lastMousePos.y;
+            
+            scrollMap(deltaX, deltaY);
+            
+            gameState.lastMousePos = { x: event.clientX, y: event.clientY };
+            event.preventDefault();
+        }
+    });
+
+    viewport.addEventListener('mouseup', function(event) {
+        if (event.button === 0) { // Left mouse button
+            gameState.isDragging = false;
+            viewport.style.cursor = 'grab';
+            event.preventDefault();
+        }
+    });
+
+    viewport.addEventListener('mouseleave', function(event) {
+        gameState.isDragging = false;
+        viewport.style.cursor = 'grab';
+    });
+
+    // Set initial cursor style
+    viewport.style.cursor = 'grab';
     
     // Window resize handler
     window.addEventListener('resize', function() {

@@ -170,13 +170,18 @@
         .terrain-tile {
             border: 1px solid rgba(255,255,255,0.1);
             position: relative;
-        }
-
-        .terrain-grass { background-color: #27ae60; }
+        }        .terrain-grass { background-color: #27ae60; }
         .terrain-rock { background-color: #7f8c8d; }
         .terrain-water { background-color: #3498db; }
         .terrain-snow { background-color: #ecf0f1; }
         .terrain-sand { background-color: #f39c12; }
+
+        .character {
+            background-color: #e74c3c !important;
+            border-radius: 2px;
+            border: 1px solid #c0392b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
 
         .game-controls {
             position: absolute;
@@ -235,10 +240,17 @@
             <div class="config-group">
                 <label class="config-label" for="worldSizeY">World Height:</label>
                 <input type="number" class="config-input" id="worldSizeY" value="50" min="10" max="200">
-            </div>
-            <div class="config-group">
+            </div>            <div class="config-group">
                 <label class="config-label" for="tribeSize">Tribe Size:</label>
                 <input type="number" class="config-input" id="tribeSize" value="10" min="5" max="100">
+            </div>
+            <div class="config-group">
+                <label class="config-label" for="biomeAlgorithm">Biome Generation:</label>
+                <select class="config-input" id="biomeAlgorithm">
+                    <option value="cluster">Cluster-based (Default)</option>
+                    <option value="voronoi">Voronoi Diagrams</option>
+                    <option value="perlin">Perlin Noise</option>
+                </select>
             </div>
             <div class="button-group">
                 <button class="menu-button secondary-button" onclick="showStartScreen()">Back</button>
@@ -259,17 +271,17 @@
         </div>
         <div class="game-viewport" id="gameViewport">
             <div class="game-map" id="gameMap"></div>
-        </div>
-        <div class="game-controls">
+        </div>        <div class="game-controls">
             <div class="control-info">Use arrow keys to scroll</div>
+            <div class="control-info">Drag with mouse to move map</div>
             <div class="control-info">Mouse wheel to zoom</div>
+            <div class="control-info">Characters: Red=idle, Orange=moving, Purple=waiting</div>
             <div class="zoom-controls">
                 <button class="zoom-button" onclick="zoomOut()">-</button>
                 <button class="zoom-button" onclick="zoomIn()">+</button>
             </div>
         </div>
-    </div>
-
+    </div>    <script src="biome-generator.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
