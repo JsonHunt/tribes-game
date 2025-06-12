@@ -1,2 +1,3 @@
 Tasks to execute:
 
+- add map objects: trees and boulders. scatter them randomly on the map. trees can be only on grass. Boulders can be only on rock. Trees can have varying sizes and slowly grow over time. Boulders can have varying sizes and don't grow. Put the min and mix sizes for trees and boulders in a configuration file. Tree growth time and number of trees and boulders as well. Mature trees spawn a tiny tree in a random location near itself (but only if it's grass) once every 30s.  

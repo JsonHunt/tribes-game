@@ -10,6 +10,7 @@ let gameState = {
     tileSize: 20,
     biomeAlgorithm: 'cluster', // Default biome generation algorithm
     characters: [], // Array to store character positions
+    mapObjects: [], // Array to store trees, boulders, etc.
     isDragging: false, // Mouse drag state
     lastMousePos: { x: 0, y: 0 }, // Last mouse position for dragging
     gameLoop: null, // Game loop interval
@@ -36,6 +37,12 @@ const CHARACTER_STATES = {
     IDLE: 'idle',
     MOVING: 'moving',
     WAITING: 'waiting'
+};
+
+// Map object types
+const OBJECT_TYPES = {
+    TREE: 'tree',
+    BOULDER: 'boulder'
 };
 
 // Biome definitions
@@ -144,6 +151,7 @@ function beginGame() {
       // Initialize the game
     generateMap();
     generateCharacters();
+    generateMapObjects();
     updateGameInfo();
     showGameplayScreen();
     
@@ -234,6 +242,156 @@ function generateCharacters() {
         assignRandomAction(character);
         
         gameState.characters.push(character);
+    }
+}
+
+// Map Objects Generation
+function generateMapObjects() {
+    gameState.mapObjects = [];
+    
+    // Generate trees on grass tiles
+    generateTrees();
+    
+    // Generate boulders on rock tiles
+    generateBoulders();
+}
+
+function generateTrees() {
+    const grassTiles = [];
+    
+    // Find all grass tiles
+    for (let y = 0; y < gameState.worldHeight; y++) {
+        for (let x = 0; x < gameState.worldWidth; x++) {
+            if (gameState.map[y][x] === TERRAIN_TYPES.GRASS) {
+                grassTiles.push({ x, y });
+            }
+        }
+    }
+    
+    // Calculate number of trees based on density
+    const numTrees = Math.floor(grassTiles.length * GAME_CONFIG.trees.density);
+    
+    // Randomly select positions for trees
+    const shuffledTiles = grassTiles.sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < Math.min(numTrees, shuffledTiles.length); i++) {
+        const tile = shuffledTiles[i];
+        const tree = {
+            id: generateObjectId(),
+            type: OBJECT_TYPES.TREE,
+            x: tile.x,
+            y: tile.y,
+            size: Math.random() * (GAME_CONFIG.trees.maxSize - GAME_CONFIG.trees.minSize) + GAME_CONFIG.trees.minSize,
+            maxSize: Math.random() * (GAME_CONFIG.trees.maxSize - GAME_CONFIG.trees.minSize) + GAME_CONFIG.trees.minSize,
+            age: Math.random() * GAME_CONFIG.trees.growthTime, // Random initial age
+            lastSpawnTime: Date.now() - Math.random() * GAME_CONFIG.trees.spawnRate
+        };
+        
+        gameState.mapObjects.push(tree);
+    }
+}
+
+function generateBoulders() {
+    const rockTiles = [];
+    
+    // Find all rock tiles
+    for (let y = 0; y < gameState.worldHeight; y++) {
+        for (let x = 0; x < gameState.worldWidth; x++) {
+            if (gameState.map[y][x] === TERRAIN_TYPES.ROCK) {
+                rockTiles.push({ x, y });
+            }
+        }
+    }
+    
+    // Calculate number of boulders based on density
+    const numBoulders = Math.floor(rockTiles.length * GAME_CONFIG.boulders.density);
+    
+    // Randomly select positions for boulders
+    const shuffledTiles = rockTiles.sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < Math.min(numBoulders, shuffledTiles.length); i++) {
+        const tile = shuffledTiles[i];
+        const boulder = {
+            id: generateObjectId(),
+            type: OBJECT_TYPES.BOULDER,
+            x: tile.x,
+            y: tile.y,
+            size: Math.random() * (GAME_CONFIG.boulders.maxSize - GAME_CONFIG.boulders.minSize) + GAME_CONFIG.boulders.minSize
+        };
+        
+        gameState.mapObjects.push(boulder);
+    }
+}
+
+function generateObjectId() {
+    return 'obj_' + Math.random().toString(36).substr(2, 9);
+}
+
+function updateMapObjects(deltaTime) {
+    const currentTime = Date.now();
+    
+    for (const obj of gameState.mapObjects) {
+        if (obj.type === OBJECT_TYPES.TREE) {
+            updateTree(obj, deltaTime, currentTime);
+        }
+    }
+}
+
+function updateTree(tree, deltaTime, currentTime) {
+    // Tree growth
+    if (tree.size < tree.maxSize) {
+        tree.age += deltaTime;
+        const growthProgress = tree.age / GAME_CONFIG.trees.growthTime;
+        tree.size = Math.min(
+            tree.maxSize,
+            GAME_CONFIG.trees.minSize + (tree.maxSize - GAME_CONFIG.trees.minSize) * growthProgress
+        );
+    }
+    
+    // Tree spawning
+    if (tree.size >= GAME_CONFIG.trees.matureThreshold * tree.maxSize) {
+        if (currentTime - tree.lastSpawnTime >= GAME_CONFIG.trees.spawnRate) {
+            attemptTreeSpawn(tree, currentTime);
+            tree.lastSpawnTime = currentTime;
+        }
+    }
+}
+
+function attemptTreeSpawn(parentTree, currentTime) {
+    const spawnRadius = GAME_CONFIG.trees.spawnRadius;
+    const attempts = 10; // Maximum attempts to find a suitable spawn location
+    
+    for (let i = 0; i < attempts; i++) {
+        // Random position within spawn radius
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * spawnRadius;
+        const spawnX = Math.round(parentTree.x + Math.cos(angle) * distance);
+        const spawnY = Math.round(parentTree.y + Math.sin(angle) * distance);
+        
+        // Check if position is valid
+        if (spawnX >= 0 && spawnX < gameState.worldWidth &&
+            spawnY >= 0 && spawnY < gameState.worldHeight &&
+            gameState.map[spawnY][spawnX] === TERRAIN_TYPES.GRASS) {
+            
+            // Check if there's already an object at this position
+            const existingObject = gameState.mapObjects.find(obj => obj.x === spawnX && obj.y === spawnY);
+            if (!existingObject) {
+                // Spawn new tree
+                const newTree = {
+                    id: generateObjectId(),
+                    type: OBJECT_TYPES.TREE,
+                    x: spawnX,
+                    y: spawnY,
+                    size: GAME_CONFIG.trees.minSize,
+                    maxSize: Math.random() * (GAME_CONFIG.trees.maxSize - GAME_CONFIG.trees.minSize) + GAME_CONFIG.trees.minSize,
+                    age: 0,
+                    lastSpawnTime: currentTime
+                };
+                
+                gameState.mapObjects.push(newTree);
+                break; // Successfully spawned, exit loop
+            }
+        }
     }
 }
 
@@ -341,7 +499,10 @@ function startGameLoop() {
         // Update character actions
         updateCharacterActions(deltaTime);
         
-        // Re-render map to show updated character positions
+        // Update map objects (e.g., trees, boulders)
+        updateMapObjects(deltaTime);
+        
+        // Re-render map to show updated character and object positions
         renderMap();
     }, 100); // Update every 100ms
 }
@@ -375,10 +536,43 @@ function renderMap() {
             tile.className = `terrain-tile terrain-${gameState.map[y][x]}`;
             tile.style.width = `${currentTileSize}px`;
             tile.style.height = `${currentTileSize}px`;
-            
-            // Add coordinates as data attributes for potential future use
+              // Add coordinates as data attributes for potential future use
             tile.dataset.x = x;
             tile.dataset.y = y;
+            
+            // Check if there are map objects on this tile
+            const objectsOnTile = gameState.mapObjects.filter(obj => obj.x === x && obj.y === y);
+            objectsOnTile.forEach(obj => {
+                const objElement = document.createElement('div');
+                objElement.className = `map-object object-${obj.type}`;
+                
+                const objSize = currentTileSize * obj.size;
+                objElement.style.width = `${objSize}px`;
+                objElement.style.height = `${objSize}px`;
+                objElement.style.position = 'absolute';
+                
+                // Center the object in the tile
+                const offsetX = (currentTileSize - objSize) / 2;
+                const offsetY = (currentTileSize - objSize) / 2;
+                objElement.style.left = `${offsetX}px`;
+                objElement.style.top = `${offsetY}px`;
+                objElement.style.zIndex = '5';
+                
+                if (obj.type === OBJECT_TYPES.TREE) {
+                    objElement.style.backgroundColor = GAME_CONFIG.visual.treeColor;
+                    objElement.style.borderRadius = '50%';
+                    objElement.style.border = `1px solid ${GAME_CONFIG.visual.treeHighlight}`;
+                    objElement.style.boxShadow = 'inset 0 1px 2px rgba(255,255,255,0.3)';
+                } else if (obj.type === OBJECT_TYPES.BOULDER) {
+                    objElement.style.backgroundColor = GAME_CONFIG.visual.boulderColor;
+                    objElement.style.borderRadius = '30%';
+                    objElement.style.border = `1px solid ${GAME_CONFIG.visual.boulderHighlight}`;
+                    objElement.style.boxShadow = 'inset 0 1px 2px rgba(255,255,255,0.2)';
+                }
+                
+                objElement.dataset.objectId = obj.id;
+                tile.appendChild(objElement);
+            });
               // Check if there's a character on this tile (or nearby due to fractional positions)
             const charactersOnTile = gameState.characters.filter(char => {
                 const charTileX = Math.floor(char.x);
