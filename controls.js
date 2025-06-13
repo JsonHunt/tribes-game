@@ -1,10 +1,20 @@
 // Game controls system - handles keyboard and mouse interactions
 export class ControlsManager {
     constructor(gameState, uiManager) {
+        if (ControlsManager._instance) {
+            throw new Error('Use ControlsManager.getInstance()');
+        }
         this.gameState = gameState;
         this.uiManager = uiManager;
         this.scrollSpeed = 20;
         this.isInitialized = false;
+    }
+
+    static getInstance(gameState, uiManager) {
+        if (!ControlsManager._instance) {
+            ControlsManager._instance = new ControlsManager(gameState, uiManager);
+        }
+        return ControlsManager._instance;
     }
 
     // Initialize all control event listeners
@@ -180,3 +190,4 @@ export class ControlsManager {
         this.scrollSpeed = Math.max(1, Math.min(100, speed)); // Clamp between 1 and 100
     }
 }
+ControlsManager._instance = null;

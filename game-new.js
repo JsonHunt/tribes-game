@@ -11,33 +11,27 @@ import GAME_CONFIG from './config.js';
 // Global game instances
 let gameState;
 let pathfindingSystem;
-let characterManager;
-let mapObjectManager;
-let uiManager;
 let gameLoop;
-let controlsManager;
 
 // Initialize the game systems
 function initializeGame() {
     gameState = new GameState();
     pathfindingSystem = new PathfindingSystem();
-    characterManager = new CharacterManager();
-    mapObjectManager = new MapObjectManager();
-    uiManager = new UIManager(gameState);
+    UIManager.getInstance(gameState); // ensure singleton is initialized
     gameLoop = new GameLoop();
-    controlsManager = new ControlsManager(gameState, uiManager);
+    ControlsManager.getInstance(gameState, UIManager.getInstance());
     
     // Make pathfinding system globally available for character updates
     window.pathfindingSystem = pathfindingSystem;
     window.gameState = gameState;
     window.gameLoop = gameLoop;
-    window.characterManager = characterManager;
-    window.mapObjectManager = mapObjectManager;
-    window.uiManager = uiManager;
+    window.characterManager = CharacterManager.getInstance();
+    window.mapObjectManager = MapObjectManager.getInstance();
+    window.uiManager = UIManager.getInstance();
     window.GAME_CONFIG = GAME_CONFIG;
     
     // Initialize controls
-    controlsManager.initialize();
+    ControlsManager.getInstance().initialize();
 }
 
 // Game configuration and initialization
@@ -62,17 +56,17 @@ function beginGame() {
     
     // Initialize the game
     MapGenerator.generateMap(gameState);
-    characterManager.generateCharacters(gameState);
-    mapObjectManager.generateMapObjects(gameState);
+    CharacterManager.getInstance().generateCharacters(gameState);
+    MapObjectManager.getInstance().generateMapObjects(gameState);
     initializePathfindingSystem();
     
     // Update UI
-    uiManager.updateGameInfo();
-    uiManager.showGameplayScreen();
-    uiManager.renderMap();
+    UIManager.getInstance().updateGameInfo();
+    UIManager.getInstance().showGameplayScreen();
+    UIManager.getInstance().renderMap();
     
     // Start the game loop
-    gameLoop.start(gameState, characterManager, mapObjectManager, uiManager);
+    gameLoop.start(gameState, CharacterManager.getInstance(), MapObjectManager.getInstance(), UIManager.getInstance());
     
     // Apply saved settings if any
     if (gameState.settings && gameState.settings.gameSpeed) {
@@ -86,49 +80,49 @@ function initializePathfindingSystem() {
     pathfindingSystem.clearCharacterRules();
     
     // Initialize special abilities for characters
-    characterManager.initializeCharacterAbilities(pathfindingSystem);
+    CharacterManager.getInstance().initializeCharacterAbilities(pathfindingSystem);
 }
 
 // Menu functions that need to be globally accessible
 function showStartScreen() {
-    uiManager.showStartScreen();
+    UIManager.getInstance().showStartScreen();
     gameLoop.stop();
 }
 
 function showNewGameScreen() {
-    uiManager.showNewGameScreen();
+    UIManager.getInstance().showNewGameScreen();
 }
 
 function showGameplayScreen() {
-    uiManager.showGameplayScreen();
+    UIManager.getInstance().showGameplayScreen();
 }
 
 function loadGame() {
-    uiManager.loadGame();
+    UIManager.getInstance().loadGame();
 }
 
 function showSettings() {
-    uiManager.showSettings();
+    UIManager.getInstance().showSettings();
 }
 
 function exitGame() {
-    uiManager.exitGame();
+    UIManager.getInstance().exitGame();
 }
 
 function zoomIn() {
-    uiManager.zoomIn();
+    UIManager.getInstance().zoomIn();
 }
 
 function zoomOut() {
-    uiManager.zoomOut();
+    UIManager.getInstance().zoomOut();
 }
 
 function hideCharacterInfo() {
-    uiManager.hideCharacterInfo();
+    UIManager.getInstance().hideCharacterInfo();
 }
 
 function applySettings() {
-    uiManager.applySettings();
+    UIManager.getInstance().applySettings();
 }
 
 // Make functions globally accessible for HTML onclick handlers

@@ -115,7 +115,16 @@ export class Character {
 
 export class CharacterManager {
     constructor() {
+        if (CharacterManager._instance) {
+            throw new Error('Use CharacterManager.getInstance()');
+        }
         this.characters = [];
+    }
+    static getInstance() {
+        if (!CharacterManager._instance) {
+            CharacterManager._instance = new CharacterManager();
+        }
+        return CharacterManager._instance;
     }
     generateCharacters(gameState) {
         this.characters = [];
@@ -159,3 +168,4 @@ export class CharacterManager {
         });
     }
 }
+CharacterManager._instance = null;

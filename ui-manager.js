@@ -6,11 +6,20 @@ import { loadSettingsValues, getGameSettings, saveGameSettings, applySettings } 
 
 export class UIManager {
     constructor(gameState) {
+        if (UIManager._instance) {
+            throw new Error('Use UIManager.getInstance()');
+        }
         this.gameState = gameState;
         // Don't setup event listeners here - they'll be handled by ControlsManager
         
         // Load saved settings
         this.gameState.settings = getGameSettings();
+    }
+    static getInstance(gameState) {
+        if (!UIManager._instance) {
+            UIManager._instance = new UIManager(gameState);
+        }
+        return UIManager._instance;
     }
 
     // Screen management functions
@@ -119,3 +128,4 @@ export class UIManager {
         }
     }
 }
+UIManager._instance = null;

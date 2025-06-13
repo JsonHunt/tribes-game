@@ -1,3 +1,7 @@
+import { CharacterManager } from './character.js';
+import { MapObjectManager } from './map.js';
+import { UIManager } from './ui-manager.js';
+
 export class GameLoop {
     constructor() {
         this.isRunning = false;
@@ -7,7 +11,7 @@ export class GameLoop {
         this.baseInterval = 100; // Base update interval in ms
     }
 
-    start(gameState, characterManager, mapObjectManager, uiManager) {
+    start(gameState) {
         if (this.isRunning) {
             this.stop();
         }
@@ -23,13 +27,13 @@ export class GameLoop {
             this.lastUpdate = currentTime;
             
             // Update character actions
-            characterManager.updateCharacters(deltaTime, gameState, window.pathfindingSystem);
+            CharacterManager.getInstance().updateCharacters(deltaTime, gameState, window.pathfindingSystem);
             
             // Update map objects (e.g., trees, boulders)
-            mapObjectManager.updateMapObjects(deltaTime, gameState);
+            MapObjectManager.getInstance().updateMapObjects(deltaTime, gameState);
             
             // Re-render map to show updated character and object positions
-            uiManager.renderMap();
+            UIManager.getInstance().renderMap();
         }, updateInterval);
         
         gameState.gameLoop = this.intervalId;
@@ -41,12 +45,9 @@ export class GameLoop {
         // If running, restart with new speed
         if (this.isRunning) {
             const gameState = window.gameState;
-            const characterManager = window.characterManager;
-            const mapObjectManager = window.mapObjectManager;
-            const uiManager = window.uiManager;
             
-            if (gameState && characterManager && mapObjectManager && uiManager) {
-                this.start(gameState, characterManager, mapObjectManager, uiManager);
+            if (gameState) {
+                this.start(gameState);
             }
         }
     }
