@@ -24,29 +24,35 @@ export class UICharacters {
                 charElement.dataset.characterId = character.id;
 
                 // Add colored border based on character's most urgent need
-                let borderColor = '#27ae60'; // Default green for content
-                let urgentNeed = null;
-                if (character.getMostUrgentNeed) {
-                    urgentNeed = character.getMostUrgentNeed();
-                    if (urgentNeed) {
-                        switch (urgentNeed.name) {
-                            case 'thirst': borderColor = '#3498db'; break;
-                            case 'hunger': borderColor = '#e67e22'; break;
-                            case 'rest': borderColor = '#9b59b6'; break;
-                            case 'safety': borderColor = '#e74c3c'; break;
-                            case 'social': borderColor = '#f39c12'; break;
-                            default: borderColor = '#27ae60'; break;
-                        }
-                    } else if (character.state === CHARACTER_STATES.MOVING) {
-                        borderColor = '#f39c12';
-                    } else if (character.state === CHARACTER_STATES.WAITING) {
-                        borderColor = '#9b59b6';
-                    }
-                }
-                charElement.style.border = `2px solid ${borderColor}`;
-                charElement.style.boxShadow = `0 0 4px ${borderColor}`;
+                // let borderColor = '#27ae60'; // Default green for content
+                // let urgentNeed = null;
+                // if (character.getMostUrgentNeed) {
+                //     urgentNeed = character.getMostUrgentNeed();
+                //     if (urgentNeed) {
+                //         switch (urgentNeed.name) {
+                //             case 'thirst': borderColor = '#27ae60'; break; // No blue border by default
+                //             case 'hunger': borderColor = '#e67e22'; break;
+                //             case 'rest': borderColor = '#9b59b6'; break;
+                //             case 'safety': borderColor = '#e74c3c'; break;
+                //             case 'social': borderColor = '#f39c12'; break;
+                //             default: borderColor = '#27ae60'; break;
+                //         }
+                //     } else if (character.state === CHARACTER_STATES.MOVING) {
+                //         borderColor = '#f39c12';
+                //     } else if (character.state === CHARACTER_STATES.WAITING) {
+                //         borderColor = '#9b59b6';
+                //     }
+                // }
+                // charElement.style.border = `2px solid ${borderColor}`;
+                // charElement.style.boxShadow = `0 0 4px ${borderColor}`;
 
                 // --- Character image (rotated) ---
+                charElement.addEventListener('mouseenter', () => {
+                    charElement.classList.add('hovered');
+                });
+                charElement.addEventListener('mouseleave', () => {
+                    charElement.classList.remove('hovered');
+                });
                 const img = document.createElement('img');
                 img.src = character.gender === 'male' ? 'assets/images/character-male.png' : 'assets/images/character-female.png';
                 img.style.width = '100%';

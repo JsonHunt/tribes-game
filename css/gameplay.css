@@ -1,0 +1,78 @@
+/* Gameplay Screen Styles */
+.gameplay-screen {
+    flex-direction: column;
+    background: #2c3e50;
+}
+.game-header {
+    height: 60px;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    justify-content: space-between;
+}
+.game-info {
+    display: flex;
+    gap: 2rem;
+}
+.info-item {
+    font-size: 1rem;
+    font-weight: bold;
+}
+.game-viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+.game-map {
+    position: absolute;
+    display: grid;
+    transition: transform 0.1s ease;
+}
+.terrain-tile {
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+}
+.terrain-grass { background-color: #27ae60; }
+.terrain-rock { background-color: #7f8c8d; }
+.terrain-water { background-color: #3498db; }
+.terrain-snow { background-color: #ecf0f1; }
+.terrain-sand { background-color: #f39c12; }
+.zoom-controls-overlay {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0,0,0,0.7);
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+.game-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    padding: 1rem;
+    border-radius: 8px;
+}
+.control-info {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+.zoom-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+.zoom-button {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.zoom-button:hover {
+    background: #2980b9;
+}

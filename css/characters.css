@@ -1,0 +1,102 @@
+/* Character styles */
+.character {
+    background-color: transparent !important;
+    border-radius: 2px;
+    border: none !important;
+    box-shadow: none !important;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.character.hovered {
+    border: 2px solid #3498db !important;
+    box-shadow: 0 0 8px #3498db !important;
+}
+.character-name-label,
+.character-action-label {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.character-info-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 250px;
+    background: rgba(0,0,0,0.9);
+    border-radius: 8px;
+    padding: 0;
+    color: white;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #34495e;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.panel-header {
+    background: #34495e;
+    padding: 10px 15px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.close-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+}
+.panel-content {
+    padding: 15px;
+}
+.section {
+    margin-bottom: 15px;
+}
+.section h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.need-item, .skill-item, .trait-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+.need-bar, .skill-bar {
+    width: 60px;
+    height: 8px;
+    background: #2c3e50;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.need-fill, .skill-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+.need-fill {
+    background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #27ae60 100%);
+}
+.skill-fill {
+    background: linear-gradient(90deg, #95a5a6 0%, #3498db 50%, #9b59b6 100%);
+}
+.trait-item {
+    color: #f39c12;
+    font-weight: bold;
+}
+.character > * {
+    pointer-events: none;
+}

@@ -1,0 +1,20 @@
+/* Settings Screen Styles */
+.settings-screen {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #4a69bd 0%, #6f86d6 100%);
+}
+.settings-group {
+    margin-bottom: 2rem;
+}
+.config-checkbox {
+    width: auto;
+    margin: 0;
+    transform: scale(1.2);
+    margin-left: 0.5rem;
+}
+.config-range {
+    width: 100%;
+    margin-top: 0.5rem;
+}

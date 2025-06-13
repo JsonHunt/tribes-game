@@ -84,6 +84,9 @@ export class Character {
     assignExplorationAction(gameState, pathfindingSystem) {
         CharacterActions.assignExplorationAction(this, gameState, pathfindingSystem);
     }
+    assignRandomAction(gameState, pathfindingSystem) {
+        CharacterActions.assignRandomAction(this, gameState, pathfindingSystem);
+    }
     findNearbyTerrain(gameState, terrainType, maxDistance = 10) {
         return CharacterUtils.findNearbyTerrain(this, gameState, terrainType, maxDistance);
     }

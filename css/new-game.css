@@ -1,0 +1,55 @@
+/* New Game Screen Styles */
+.new-game-screen {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+.config-panel {
+    background: rgba(255,255,255,0.1);
+    padding: 2rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.config-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.config-group {
+    margin-bottom: 1.5rem;
+}
+.config-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.config-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    outline: none;
+    pointer-events: auto;
+}
+.config-input:focus {
+    background: rgba(255,255,255,1);
+    box-shadow: 0 0 0 2px #3498db;
+}
+.button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+.secondary-button {
+    background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+}
+.secondary-button:hover {
+    background: linear-gradient(45deg, #bdc3c7, #95a5a6);
+}
