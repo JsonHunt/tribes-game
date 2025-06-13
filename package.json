@@ -17,6 +17,7 @@
   "license": "ISC",
   "description": "A simple tribes civilization game built with Electron",
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "electron": "^36.4.0",
     "eslint": "^9.28.0"
   }
