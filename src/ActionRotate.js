@@ -1,4 +1,4 @@
-import { ACTION_OUTCOME } from "./Action";
+import { ACTION_OUTCOME } from "./Action.js";
 
 export default class ActionRotate {
   constructor(character, targetLocation) {

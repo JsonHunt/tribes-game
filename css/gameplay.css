@@ -31,7 +31,7 @@
 }
 .terrain-tile {
     border: 1px solid rgba(255,255,255,0.1);
-    position: relative;
+    position: absolute;
 }
 .terrain-grass { background-color: #27ae60; }
 .terrain-rock { background-color: #7f8c8d; }

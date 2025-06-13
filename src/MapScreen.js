@@ -1,4 +1,5 @@
-import { Screen } from "./Screen";
+import { Map } from "./Map.js";
+import { Screen } from "./Screen.js";
 
 export class MapScreen extends Screen {
   show() {

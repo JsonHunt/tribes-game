@@ -1,10 +1,13 @@
 // MapObject: Handles creation, updating, and lookup of map object DOM elements (trees, boulders, etc.)
 
 export class MapObject {
-    id = null;
-    type = null;
-    tile = null;
-    size = 1;
+    constructor() {
+        this.id = null;
+        this.type = null;
+        this.tile = null;
+        this.size = 1;
+    }
+
     /**
      * Create or update a map object DOM element (tree, boulder, etc.)
      * @param {Object} obj - The map object data

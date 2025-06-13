@@ -1,4 +1,4 @@
-import ActionMove from "./ActionMove";
+import ActionMove from "./ActionMove.js";
 
 export default class CharacterBehavior {
   static chooseNextAction(character) {

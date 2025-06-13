@@ -1,5 +1,5 @@
-import Game from "./Game";
-import { Screen } from "./Screen";
+import Game from "./Game.js";
+import { Screen } from "./Screen.js";
 
 export class HomeScreen extends Screen {
   show() {

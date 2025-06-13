@@ -4,8 +4,9 @@ export class Screen {
   }
 
   show() {
-    this.element = document.createElement('screen');
+    this.element = document.createElement('div');
     this.element.className = 'screen';
+    document.body.appendChild(this.element);
     Screen.currentScreen = this;
   }
 

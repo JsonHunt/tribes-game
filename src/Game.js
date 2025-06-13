@@ -2,18 +2,19 @@
 import { HomeScreen } from "./HomeScreen.js";
 import { BIOME_ALGORITHMS, MapGenerator } from "./MapGenerator.js";
 import { MapScreen } from "./MapScreen.js";
-import { MapTile } from "./MapTile.js";
+import { TERRAIN_TYPES } from "./MapTile.js";
 import { RandomCharacterGenerator } from "./RandomCharacterGenerator.js";
 import { Screen } from "./Screen.js";
+import { Map } from "./Map.js";
 
 export default class Game {
   static startNewGame() {
     const biomeAlgorithm = BIOME_ALGORITHMS.CLUSTER;
-    const mapTiles = MapGenerator.generateMapTiles(100, 100, biomeAlgorithm, MapTile.TERRAIN_TYPES);
+    const mapTiles = MapGenerator.generateMapTiles(100, 100, biomeAlgorithm, Object.values(TERRAIN_TYPES));
     const map = new Map(mapTiles);
     Map.currentMap = map;
     RandomCharacterGenerator.generateRandomCharacters();
-    MapScreen.show();
+    new MapScreen().show();
   }
 
   static endGame() {}
@@ -32,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Window resize handler
 window.addEventListener("resize", () => {
-  if (this.gameState.currentScreen === "gameplayScreen") {
+  if (Screen.currentScreen === "map") {
     // TODO: Update map position or resize logic
   }
 });

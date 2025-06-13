@@ -1,5 +1,5 @@
-import { Map } from "./map";
-import { Screen } from "./Screen";
+import { Map } from "./Map.js";
+import { Screen } from "./Screen.js";
 
 // Game controls system - handles keyboard and mouse interactions
 export class Controls {

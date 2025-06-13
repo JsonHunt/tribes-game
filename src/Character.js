@@ -1,7 +1,7 @@
 import { ACTION_OUTCOME } from "./Action.js";
 import CharacterBehavior from "./CharacterBehavior.js";
 import { CharacterInfoPanel } from "./CharacterInfoPanel.js";
-import Needs from "./Need.js";
+import Needs from "./Needs.js";
 
 export class Character {
   constructor(id) {
