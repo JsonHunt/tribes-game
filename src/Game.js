@@ -10,7 +10,7 @@ import { Character } from "./Character.js";
 
 export default class Game {
   static startNewGame() {
-    const biomeAlgorithm = BIOME_ALGORITHMS.CLUSTER;
+    const biomeAlgorithm = BIOME_ALGORITHMS.VORONOI;
     const mapTiles = MapGenerator.generateMapTiles(40, 40, biomeAlgorithm, Object.values(TERRAIN_TYPES));
     const map = new Map(mapTiles);
     Map.currentMap = map;

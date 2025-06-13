@@ -6,27 +6,29 @@ export default class ActionRotate {
     // Calculate the target rotation based on character location and the target location
     const dx = targetLocation.x - character.position.x;
     const dy = targetLocation.y - character.position.y;
+    // Calculate angle in degrees, normalized to [0, 360)
     this.targetRotation = Math.atan2(dy, dx) * (180 / Math.PI);
-    this.targetRotation = -90 + (this.targetRotation + 360) % 360; // Normalize to [0, 360)
+    this.targetRotation = (this.targetRotation + 360) % 360;
   }
 
   execute() {
-    // Check if the character is already at the target rotation
-    if (this.character.rotation === this.targetRotation) {
-      console.log("Character is already at the target rotation.");
+    // If already at the target rotation (allow small epsilon for float errors)
+    const epsilon = 1;
+    let rotationDifference = this.targetRotation - this.character.rotation;
+    // Normalize to [-180, 180] for shortest rotation
+    rotationDifference = ((rotationDifference + 180) % 360) - 180;
+    if (Math.abs(rotationDifference) < epsilon) {
+      this.character.rotation = this.targetRotation;
+      // Apply a -90 degree offset to the image rotation
+      this.character.imageElement.style.transform = `rotate(${this.character.rotation - 90}deg)`;
       return ACTION_OUTCOME.COMPLETED;
     }
-    // Rotate the character towards the target rotation
-    const rotationSpeed = 25; // Degrees per frame, adjust as needed
-    const rotationDifference = this.targetRotation - this.character.rotation;
-    if (Math.abs(rotationDifference) < rotationSpeed) {
-      this.character.rotation = this.targetRotation;
-    } else {
-      this.character.rotation += Math.sign(rotationDifference) * rotationSpeed;
-    }
-
-    this.character.imageElement.style.transform = `rotate(${this.character.rotation}deg)`;
-
+    // Only rotate if not already facing target
+    const rotationSpeed = 25; // Degrees per frame
+    this.character.rotation += Math.sign(rotationDifference) * Math.min(rotationSpeed, Math.abs(rotationDifference));
+    this.character.rotation = (this.character.rotation + 360) % 360; // Keep in [0, 360)
+    // Apply a -90 degree offset to the image rotation
+    this.character.imageElement.style.transform = `rotate(${this.character.rotation - 90}deg)`;
     return ACTION_OUTCOME.IN_PROGRESS;
   }
 }

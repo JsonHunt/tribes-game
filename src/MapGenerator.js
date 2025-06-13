@@ -26,17 +26,25 @@ export class MapGenerator {
         for (let i = 0; i < numClusters; i++) {
             const x = Math.floor(Math.random() * width);
             const y = Math.floor(Math.random() * height);
-            const terrain = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
+            // Increase chance for water clusters
+            let terrain;
+            if (Math.random() < 0.35) { // 35% chance for water cluster
+                terrain = 'water';
+            } else {
+                terrain = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
+            }
             map[y][x] = terrain;
             seeds.push({ x, y, terrain });
         }
-        // Expand clusters
+        // Expand clusters, water clusters expand more
         const directions = [ [0,1], [1,0], [0,-1], [-1,0] ];
         for (let iter = 0; iter < width * height; iter++) {
             for (const { x, y, terrain } of seeds) {
                 for (const [dx, dy] of directions) {
-                    const nx = x + dx * Math.floor(Math.random() * 3);
-                    const ny = y + dy * Math.floor(Math.random() * 3);
+                    // Water clusters expand further
+                    const expansion = (terrain === 'water') ? 3 : 2;
+                    const nx = x + dx * Math.floor(Math.random() * expansion + 1);
+                    const ny = y + dy * Math.floor(Math.random() * expansion + 1);
                     if (nx >= 0 && nx < width && ny >= 0 && ny < height && !map[ny][nx]) {
                         map[ny][nx] = terrain;
                     }
