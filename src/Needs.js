@@ -1,17 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Character } from '../ui-characters';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import needsData from "../config/needs.js";
+import { Character } from "./Character.js";
 
 class Needs {
-  
   static getNeedByName(character, needName) {
     return character.needs.get(needName);
   }
-  
+
   static getMostUrgentNeed(character) {
     if (!character || !character.needs) throw new Error("Character or needs not defined");
     let mostUrgent = null;
@@ -26,17 +20,15 @@ class Needs {
     return mostUrgent;
   }
 
-  static loadNeedsCofig() {
-    const needsFilePath = path.join(__dirname, 'needs.json');
-    Needs.needsData = JSON.parse(fs.readFileSync(needsFilePath, 'utf8'));
-  }
-    
   static initializeNeeds(character) {
-    for (const needConfig of Object.values(Needs.needsData)) {
+    for (const [needName, needConfig] of Object.entries(needsData)) {
       character.needs.set(
-        needConfig.name,
+        needName,
         {
-          satisfaction: needConfig.initialSatisfaction || needConfig.max
+          satisfaction: needConfig.initial || needConfig.max,
+          priority: needConfig.priority,
+          decayRate: needConfig.decayRate,
+          lastUpdate: Date.now(),
         }
       );
     }
@@ -45,7 +37,7 @@ class Needs {
   static decayNeeds(character) {
     const currentTime = Date.now();
     for (const need of character.needs.values()) {
-      const timeSinceLastUpdate = currentTime - need.lastUpdate;
+      const timeSinceLastUpdate = currentTime - (need.lastUpdate || currentTime);
       const hoursElapsed = timeSinceLastUpdate / (1000 * 60 * 60);
       const decay = need.decayRate * hoursElapsed * 10; // Adjust decay rate as needed
       need.satisfaction = Math.max(0, need.satisfaction - decay);
@@ -60,7 +52,7 @@ class Needs {
   }
 
   static startGameLoop() {
-    Needs.loopInterval = setInterval(Needs.onGameLoopUpdate, 1000); 
+    Needs.loopInterval = setInterval(Needs.onGameLoopUpdate, 1000);
   }
 
   static stopGameLoop() {
@@ -69,9 +61,8 @@ class Needs {
       Needs.loopInterval = null;
     }
   }
-
 }
 
-Needs.needsData;
+Needs.needsData = needsData;
 
 export default Needs;

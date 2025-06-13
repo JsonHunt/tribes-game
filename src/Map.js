@@ -1,23 +1,29 @@
-import { UIMapTile } from "./ui-map-tile.js";
+import { MapTile } from "./MapTile.js";
 
 export class Map {
-  constructor() {
+  constructor(mapTiles) {
     this.tiles = []; // 2D array of tile data
     this.mapElement = document.createElement("div");
     this.width = 100; // Default width, number of tiles horizontally
     this.height = 100; // Default height, number of tiles vertically
     this.tileSize = 32; // Default tile size in pixels
     this.zoomLevel = 1;
+    this.spawnTiles(mapTiles);
   }
 
   static discardMap() {}
 
-  spawnTiles() {
+  spawnTiles(mapTiles) {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        const tile = UIMapTile.createTile(x, y, this.map[y][x], this.tileSize);
-        this.mapElement.appendChild(tile);
-        this.tileElements.push(tile);
+        const tile = new MapTile(mapTiles[y][x]);
+        this.mapElement.appendChild(tile.domElement);
+        tile.domElement.style.width = `${this.tileSize}px`;
+        tile.domElement.style.height = `${this.tileSize}px`;
+        tile.domElement.style.left = `${x * this.tileSize}px`;
+        tile.domElement.style.top = `${y * this.tileSize}px`;
+        if (!this.tiles[y]) this.tiles[y] = [];
+        this.tiles[y][x] = tile;
       }
     }
   }

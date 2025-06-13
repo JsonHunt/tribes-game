@@ -1,15 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import abilitiesData from "../config/abilities.js";
 
 class Abilities {
-
   addAbility(character, name) {
-     character.abilities[name] = {
-      ...this.abilities[name],
+    character.abilities[name] = {
+      ...Abilities.data[name],
       level: 1, // Default level
       experience: 0 // Default experience
     };
@@ -26,14 +20,8 @@ class Abilities {
   listAbilities(character) {
     return Object.keys(character.abilities);
   }
-
-  loadAbilitiesFromConfig() {
-    const filePath = path.join(__dirname, 'abilities.json');
-    Abilities.data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  }
-
 }
 
-Abilities.data = {};
+Abilities.data = abilitiesData;
 
 export default Abilities;

@@ -9,7 +9,7 @@ export const TERRAIN_TYPES = {
 };
 
 export class MapTile {
-    cconstructor(terrainType) {
+    constructor(terrainType) {
         this.terrainType = terrainType;
         this.domElement = document.createElement('div');
         this.domElement.className = `terrain-tile terrain-${terrainType}`;

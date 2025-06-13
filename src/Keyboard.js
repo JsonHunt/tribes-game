@@ -1,4 +1,4 @@
-import { Map } from "./map";
+import { Map } from "./Map.js";
 
 // Game controls system - handles keyboard and mouse interactions
 export class Controls {

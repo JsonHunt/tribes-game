@@ -1,5 +1,5 @@
-import { Character } from "../Character";
-import names from "../config/names";
+import { Character } from "./Character.js";
+import names from "../config/names.js";
 
 // Character initialization and system setup methods
 export class RandomCharacterGenerator {

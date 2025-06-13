@@ -1,4 +1,4 @@
-
+import { TERRAIN_TYPES } from "./MapTile.js";
 
 // Character action types
 export const ACTION_TYPES = {

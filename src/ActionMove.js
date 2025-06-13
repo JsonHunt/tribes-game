@@ -1,5 +1,5 @@
-import { ACTION_OUTCOME } from "./Action";
-import ActionRotate from "./ActionRotate";
+import { ACTION_OUTCOME } from "./Action.js";
+import ActionRotate from "./ActionRotate.js";
 
 export default class ActionMove {
   constructor(character, targetPosition) {
