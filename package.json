@@ -8,11 +8,16 @@
     "build": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["electron", "game", "tribes"],
+  "keywords": [
+    "electron",
+    "game",
+    "tribes"
+  ],
   "author": "",
   "license": "ISC",
   "description": "A simple tribes civilization game built with Electron",
   "devDependencies": {
-    "electron": "^36.4.0"
+    "electron": "^36.4.0",
+    "eslint": "^9.28.0"
   }
 }
