@@ -155,16 +155,52 @@ export class UIManager {
             const charTileY = Math.floor(char.y);
             return charTileX === x && charTileY === y;
         });
-        
-        if (charactersOnTile.length > 0) {
+          if (charactersOnTile.length > 0) {
             charactersOnTile.forEach(character => {
                 const charElement = document.createElement('div');
                 charElement.className = 'character';
                 charElement.style.width = `${currentTileSize * 0.8}px`;
                 charElement.style.height = `${currentTileSize * 0.8}px`;
                 
-                // Color based on character's most urgent need
-                let color = '#e74c3c'; // Default red
+                // Use character image instead of colored square
+                const imagePath = character.gender === 'male' ? 'assets/images/character-male.png' : 'assets/images/character-female.png';
+                charElement.style.backgroundImage = `url('${imagePath}')`;
+                charElement.style.backgroundSize = 'cover';
+                charElement.style.backgroundPosition = 'center';
+                charElement.style.backgroundRepeat = 'no-repeat';
+                
+                // Apply rotation based on character direction
+                let rotation = 0;
+                switch (character.direction) {
+                    case 'up':
+                        rotation = 180;
+                        break;
+                    case 'left':
+                        rotation = 90;
+                        break;
+                    case 'right':
+                        rotation = -90;
+                        break;
+                    case 'down':
+                    default:
+                        rotation = 0;
+                        break;
+                }
+                charElement.style.transform = `rotate(${rotation}deg)`;
+                
+                charElement.style.position = 'absolute';
+                
+                // Calculate precise position within the tile
+                const offsetX = (character.x - Math.floor(character.x)) * currentTileSize;
+                const offsetY = (character.y - Math.floor(character.y)) * currentTileSize;
+                  charElement.style.top = `${currentTileSize * 0.1 + offsetY}px`;
+                charElement.style.left = `${currentTileSize * 0.1 + offsetX}px`;
+                charElement.style.borderRadius = '2px';
+                charElement.style.zIndex = '10';
+                charElement.dataset.characterId = character.id;
+                
+                // Add colored border based on character's most urgent need
+                let borderColor = '#27ae60'; // Default green for content
                 let urgentNeed = null;
                 
                 if (character.getMostUrgentNeed) {
@@ -173,43 +209,33 @@ export class UIManager {
                     if (urgentNeed) {
                         switch (urgentNeed.name) {
                             case 'thirst':
-                                color = '#3498db'; // Blue for thirst
+                                borderColor = '#3498db'; // Blue for thirst
                                 break;
                             case 'hunger':
-                                color = '#e67e22'; // Orange for hunger
+                                borderColor = '#e67e22'; // Orange for hunger
                                 break;
                             case 'rest':
-                                color = '#9b59b6'; // Purple for rest
+                                borderColor = '#9b59b6'; // Purple for rest
                                 break;
                             case 'safety':
-                                color = '#e74c3c'; // Red for safety
+                                borderColor = '#e74c3c'; // Red for safety
                                 break;
                             case 'social':
-                                color = '#f39c12'; // Yellow for social
+                                borderColor = '#f39c12'; // Yellow for social
                                 break;
                             default:
-                                color = '#27ae60'; // Green for content/other needs
+                                borderColor = '#27ae60'; // Green for content/other needs
                                 break;
                         }
                     } else if (character.state === CHARACTER_STATES.MOVING) {
-                        color = '#f39c12'; // Orange for moving
+                        borderColor = '#f39c12'; // Orange for moving
                     } else if (character.state === CHARACTER_STATES.WAITING) {
-                        color = '#9b59b6'; // Purple for waiting
+                        borderColor = '#9b59b6'; // Purple for waiting
                     }
                 }
                 
-                charElement.style.backgroundColor = color;
-                charElement.style.position = 'absolute';
-                
-                // Calculate precise position within the tile
-                const offsetX = (character.x - Math.floor(character.x)) * currentTileSize;
-                const offsetY = (character.y - Math.floor(character.y)) * currentTileSize;
-                
-                charElement.style.top = `${currentTileSize * 0.1 + offsetY}px`;
-                charElement.style.left = `${currentTileSize * 0.1 + offsetX}px`;
-                charElement.style.borderRadius = '2px';
-                charElement.style.zIndex = '10';
-                charElement.dataset.characterId = character.id;
+                charElement.style.border = `2px solid ${borderColor}`;
+                charElement.style.boxShadow = `0 0 4px ${borderColor}`;
                 
                 // Get settings
                 const settings = this.getGameSettings();
@@ -219,43 +245,49 @@ export class UIManager {
                 if (settings.enableSmoothAnimations) {
                     charElement.style.transition = 'all 0.2s ease';
                 }
-                
-                // Add hover event listeners
+                  // Add hover event listeners
                 charElement.addEventListener('mouseenter', (e) => {
-                    charElement.style.transform = 'scale(1.2)';
+                    charElement.style.transform = `scale(1.2) rotate(${rotation}deg)`;
                     charElement.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.8)';
                     charElement.style.border = '2px solid rgba(255, 255, 255, 0.9)';
                     charElement.style.zIndex = '15';
                 });
-                
-                charElement.addEventListener('mouseleave', (e) => {
-                    charElement.style.transform = 'scale(1)';
-                    charElement.style.border = '';
+                  charElement.addEventListener('mouseleave', (e) => {
+                    charElement.style.transform = `scale(1) rotate(${rotation}deg)`;
                     charElement.style.zIndex = '10';
-                    // Reset to action-based shadow
+                    
+                    // Reset to action-based visual indicators if enabled, otherwise use need-based border
                     if (character.currentAction && settings.showActionIndicators) {
                         switch (character.currentAction.type) {
                             case ACTION_TYPES.MOVE_TO:
                                 charElement.style.boxShadow = '0 0 8px rgba(243, 156, 18, 0.6)';
+                                charElement.style.border = this.gameState.showPaths && character.currentAction.path ? 
+                                    '2px solid rgba(243, 156, 18, 0.8)' : `2px solid ${borderColor}`;
                                 break;
                             case ACTION_TYPES.DRINK:
                                 charElement.style.boxShadow = '0 0 8px rgba(52, 152, 219, 0.8)';
+                                charElement.style.border = '2px solid rgba(52, 152, 219, 0.6)';
                                 break;
                             case ACTION_TYPES.EAT:
                                 charElement.style.boxShadow = '0 0 8px rgba(230, 126, 34, 0.8)';
+                                charElement.style.border = '2px solid rgba(230, 126, 34, 0.6)';
                                 break;
                             case ACTION_TYPES.REST:
                                 charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.8)';
+                                charElement.style.border = '2px solid rgba(155, 89, 182, 0.6)';
                                 break;
                             case ACTION_TYPES.WAIT:
                                 charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.6)';
+                                charElement.style.border = `2px solid ${borderColor}`;
                                 break;
                             default:
-                                charElement.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.3)';
+                                charElement.style.boxShadow = `0 0 4px ${borderColor}`;
+                                charElement.style.border = `2px solid ${borderColor}`;
                                 break;
                         }
                     } else {
-                        charElement.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.3)';
+                        charElement.style.boxShadow = `0 0 4px ${borderColor}`;
+                        charElement.style.border = `2px solid ${borderColor}`;
                     }
                 });
                 
@@ -264,8 +296,7 @@ export class UIManager {
                     e.stopPropagation();
                     this.showCharacterInfo(character);
                 });
-                
-                // Add action indicator with enhanced visual feedback if enabled
+                  // Add action indicator with enhanced visual feedback if enabled
                 if (character.currentAction && settings.showActionIndicators) {
                     switch (character.currentAction.type) {
                         case ACTION_TYPES.MOVE_TO:
@@ -288,9 +319,10 @@ export class UIManager {
                             break;
                         case ACTION_TYPES.WAIT:
                             charElement.style.boxShadow = '0 0 8px rgba(155, 89, 182, 0.6)';
+                            // Keep need-based border for wait action
                             break;
                         default:
-                            charElement.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.3)';
+                            // Keep need-based styling for unknown actions
                             break;
                     }
                 }
@@ -335,13 +367,14 @@ export class UIManager {
                         actionLabel.style.zIndex = '11';
                         actionLabel.style.whiteSpace = 'nowrap';
                         charElement.appendChild(actionLabel);
-                    }
-                }
+                    }                }
                 
                 tile.appendChild(charElement);
             });
         }
-    }    updateMapPosition() {
+    }
+
+    updateMapPosition() {
         const gameMap = document.getElementById('gameMap');
         
         if (!gameMap) return; // Safety check

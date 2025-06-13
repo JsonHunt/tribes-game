@@ -152,4 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set focus to the window for keyboard controls
     window.focus();
     console.log('Game initialization complete');
+    
+    const startNewGameBtn = document.getElementById('startNewGameButton');
+    if (startNewGameBtn) {
+        startNewGameBtn.addEventListener('click', showNewGameScreen);
+    }
 });
