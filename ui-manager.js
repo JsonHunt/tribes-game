@@ -1,5 +1,3 @@
-import { CHARACTER_STATES, ACTION_TYPES, OBJECT_TYPES } from './constants.js';
-import GAME_CONFIG from './config.js';
 import { UIScreens } from './ui-screens.js';
 import { UIMap } from './ui-map.js';
 import { UICharacters } from './ui-characters.js';

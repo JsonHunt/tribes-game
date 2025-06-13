@@ -16,7 +16,7 @@ class BiomeGenerator {
     }
 
     // Override this method in subclasses
-    generateBiomes(gameState) {
+    generateBiomes() {
         throw new Error('generateBiomes method must be implemented by subclass');
     }
 

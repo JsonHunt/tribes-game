@@ -1,5 +1,5 @@
 // Info panel logic extracted from UIManager
-export function showCharacterInfo(character, gameState) {
+export function showCharacterInfo(character) {
     const panel = document.getElementById('characterInfoPanel');
     const characterIdSpan = document.getElementById('selectedCharacterId');
     const currentNeedDiv = document.getElementById('currentNeed');

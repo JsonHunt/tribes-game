@@ -54,7 +54,7 @@ export class PathfindingSystem {
         }
 
         // Apply all movement rules
-        for (const [ruleId, ruleFunction] of this.movementRules) {
+        for (const [, ruleFunction] of this.movementRules) {
             if (!ruleFunction(fromTile, toTile, character, gameState)) {
                 return false;
             }

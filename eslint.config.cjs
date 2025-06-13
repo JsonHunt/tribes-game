@@ -23,6 +23,7 @@ module.exports = [
         localStorage: 'readonly',
         setTimeout: 'readonly',
         clearInterval: 'readonly',
+        setInterval: 'readonly',
         console: 'readonly',
         process: 'readonly',
         require: 'readonly',

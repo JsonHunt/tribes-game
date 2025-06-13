@@ -1,5 +1,6 @@
+import { CHARACTER_STATES } from './constants.js';
+
 // Character rendering logic for the UI
-import { CHARACTER_STATES, ACTION_TYPES } from './constants.js';
 
 export class UICharacters {
     static renderCharactersOnTile(tile, x, y, currentTileSize, gameState, getGameSettings) {

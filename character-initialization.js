@@ -92,10 +92,10 @@ export class CharacterInitialization {
     }
 
     // Update needs over time
-    static updateNeeds(character, deltaTime) {
+    static updateNeeds(character) {
         const currentTime = Date.now();
         
-        for (const [needName, need] of character.needs) {
+        for (const [, need] of character.needs) {
             const timeSinceLastUpdate = currentTime - need.lastUpdate;
             const hoursElapsed = timeSinceLastUpdate / (1000 * 60 * 60); // Convert to hours
             

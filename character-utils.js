@@ -1,5 +1,3 @@
-import { TERRAIN_TYPES } from './constants.js';
-
 // Character utility functions
 export class CharacterUtils {
     

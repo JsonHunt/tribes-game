@@ -1,12 +1,10 @@
 // UI map rendering and controls
 import { OBJECT_TYPES } from './constants.js';
 import GAME_CONFIG from './config.js';
-import { UICharacters } from './ui-characters.js';
 
 export class UIMap {
     static renderMap(gameState, renderCharactersOnTile) {
         const gameMap = document.getElementById('gameMap');
-        const viewport = document.getElementById('gameViewport');
         gameMap.innerHTML = '';
         const currentTileSize = gameState.tileSize * gameState.zoomLevel;
         gameMap.style.gridTemplateColumns = `repeat(${gameState.worldWidth}, ${currentTileSize}px)`;
