@@ -22,7 +22,8 @@ export class Map {
         tile.domElement.style.height = `${this.tileSize}px`;
         tile.domElement.style.left = `${x * this.tileSize}px`;
         tile.domElement.style.top = `${y * this.tileSize}px`;
-        this.tiles.push(tile);
+        if (!this.tiles[y]) this.tiles[y] = [];
+        this.tiles[y][x] = tile;
       }
     }
   }
