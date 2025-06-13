@@ -1,4 +1,5 @@
 import { Map } from "./Map.js";
+import { Screen } from "./Screen.js";
 
 // Game controls system - handles keyboard and mouse interactions
 export class Controls {
@@ -11,45 +12,45 @@ export class Controls {
             }
             
             // Only handle keyboard controls when in gameplay screen
-            if (this.gameState.currentScreen !== 'map') {
+            if (Screen.currentScreen.name !== 'map') {
                 return;
             }
             
             let handled = false;
-            
+            const map = Map.currentMap;
             switch(event.key) {
                 case 'ArrowUp':
                 case 'w':
                 case 'W':
-                    Map.move(0, this.scrollSpeed);
+                    map.move(0, this.scrollSpeed);
                     handled = true;
                     break;
                 case 'ArrowDown':
                 case 's':
                 case 'S':
-                    Map.move(0, -this.scrollSpeed);
+                    map.move(0, -this.scrollSpeed);
                     handled = true;
                     break;
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    Map.move(this.scrollSpeed, 0);
+                    map.move(this.scrollSpeed, 0);
                     handled = true;
                     break;
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    Map.move(-this.scrollSpeed, 0);
+                    map.move(-this.scrollSpeed, 0);
                     handled = true;
                     break;
                 case '+':
                 case '=':
-                    Map.zoomIn();
+                    map.zoomIn();
                     handled = true;
                     break;
                 case '-':
                 case '_':
-                    Map.zoomOut();
+                    map.zoomOut();
                     handled = true;
                     break;
                 case 'Escape':

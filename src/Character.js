@@ -2,13 +2,14 @@ import { ACTION_OUTCOME } from "./Action.js";
 import CharacterBehavior from "./CharacterBehavior.js";
 import { CharacterInfoPanel } from "./CharacterInfoPanel.js";
 import Needs from "./Needs.js";
+import { Map } from "./Map.js";
 
 export class Character {
   constructor(id) {
     this.id = id;
-    this.skills = new Map();
-    this.traits = new Map();
-    this.needs = new Map();
+    this.skills = {};
+    this.traits = {};
+    this.needs = {};
     this.position = { x: 0, y: 0 };
     this.rotation = 0;
     this.lastMovementDirection = { dx: 0, dy: 0 };
@@ -26,9 +27,16 @@ export class Character {
   createElement() {
     const charElement = document.createElement("div");
     charElement.className = "character";
-    charElement.style.position = "absolute"; // keep for layout
-    charElement.dataset.characterId = this.id;
-    
+    charElement.style.width = "32px"; // Default size
+    charElement.style.height = "32px"; // Default size
+
+    // Position character based on its position, size, and map tile size
+    const size = 32; // Default size, could be parameterized
+    const tileSize = Map.currentMap.tileSize || 32;
+    charElement.style.position = "absolute";
+    charElement.style.left = `${this.position.x * tileSize + (tileSize - size) / 2}px`;
+    charElement.style.top = `${this.position.y * tileSize + (tileSize - size) / 2}px`;
+
     // Hover logic
     charElement.addEventListener("mouseenter", () => {
       charElement.classList.add("hovered");
@@ -49,6 +57,12 @@ export class Character {
     // Image
     this.imageElement = document.createElement("img");
     this.imageElement.className = "character-img";
+    // Assign image based on gender property
+    if (this.gender && this.gender.toLowerCase() === "female") {
+      this.imageElement.src = "assets/images/character-female.png";
+    } else {
+      this.imageElement.src = "assets/images/character-male.png";
+    }
     charElement.appendChild(this.imageElement);
     
     const nameLabel = document.createElement("div");
@@ -60,6 +74,7 @@ export class Character {
     charElement.appendChild(actionLabel);
     
     Map.currentMap.mapElement.appendChild(charElement);
+    this.charElement = charElement;
   }
 
   resizeElement(newSize) {

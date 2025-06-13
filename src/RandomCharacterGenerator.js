@@ -1,5 +1,6 @@
 import { Character } from "./Character.js";
 import names from "../config/names.js";
+import { Map } from "./Map.js";
 
 // Character initialization and system setup methods
 export class RandomCharacterGenerator {
@@ -18,7 +19,7 @@ export class RandomCharacterGenerator {
     }
   }
 
-  static generateRandomName(gender) {
+  static getRandomName(gender) {
     const nameList = names[gender];
     if (!nameList || nameList.length === 0) {
       return `Character_${Math.random().toString(36).substr(2, 9)}`; // Fallback name
@@ -26,11 +27,11 @@ export class RandomCharacterGenerator {
     return nameList[Math.floor(Math.random() * nameList.length)];
   }
 
-  static generateRandomAge() {
+  static getRandomAge() {
     return Math.floor(Math.random() * 60) + 18; // Age between 18 and 77
   }
 
-  static generateRandomGender() {
+  static getRandomGender() {
     return Math.random() < 0.5 ? "male" : "female";
   }
 }

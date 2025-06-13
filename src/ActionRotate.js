@@ -7,7 +7,7 @@ export default class ActionRotate {
     const dx = targetLocation.x - character.position.x;
     const dy = targetLocation.y - character.position.y;
     this.targetRotation = Math.atan2(dy, dx) * (180 / Math.PI);
-    this.targetRotation = (this.targetRotation + 360) % 360; // Normalize to [0, 360)
+    this.targetRotation = -90 + (this.targetRotation + 360) % 360; // Normalize to [0, 360)
   }
 
   execute() {
@@ -17,7 +17,7 @@ export default class ActionRotate {
       return ACTION_OUTCOME.COMPLETED;
     }
     // Rotate the character towards the target rotation
-    const rotationSpeed = 5; // Degrees per frame, adjust as needed
+    const rotationSpeed = 25; // Degrees per frame, adjust as needed
     const rotationDifference = this.targetRotation - this.character.rotation;
     if (Math.abs(rotationDifference) < rotationSpeed) {
       this.character.rotation = this.targetRotation;

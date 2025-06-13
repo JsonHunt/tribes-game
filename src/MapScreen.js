@@ -1,5 +1,7 @@
 import { Map } from "./Map.js";
 import { Screen } from "./Screen.js";
+import { Controls as KeyboardControls } from "./Keyboard.js";
+import { Controls as MouseControls } from "./Mouse.js";
 
 export class MapScreen extends Screen {
   show() {
@@ -48,5 +50,17 @@ export class MapScreen extends Screen {
         `;
     this.mapContainer = Map.currentMap.mapElement;
     this.element.appendChild(this.mapContainer);
+
+    // Setup controls
+    if (!this.keyboardControls) {
+      this.keyboardControls = new KeyboardControls();
+      this.keyboardControls.gameState = { currentScreen: 'map' };
+      this.keyboardControls.scrollSpeed = 32;
+      this.keyboardControls.setupKeyboardControls();
+    }
+    if (!this.mouseControls) {
+      this.mouseControls = new MouseControls();
+      this.mouseControls.setupMouseControls();
+    }
   }
 }

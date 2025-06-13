@@ -1,4 +1,5 @@
 import ActionMove from "./ActionMove.js";
+import { Map } from "./Map.js";
 
 export default class CharacterBehavior {
   static chooseNextAction(character) {

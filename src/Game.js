@@ -6,15 +6,18 @@ import { TERRAIN_TYPES } from "./MapTile.js";
 import { RandomCharacterGenerator } from "./RandomCharacterGenerator.js";
 import { Screen } from "./Screen.js";
 import { Map } from "./Map.js";
+import { Character } from "./Character.js";
 
 export default class Game {
   static startNewGame() {
     const biomeAlgorithm = BIOME_ALGORITHMS.CLUSTER;
-    const mapTiles = MapGenerator.generateMapTiles(100, 100, biomeAlgorithm, Object.values(TERRAIN_TYPES));
+    const mapTiles = MapGenerator.generateMapTiles(40, 40, biomeAlgorithm, Object.values(TERRAIN_TYPES));
     const map = new Map(mapTiles);
     Map.currentMap = map;
-    RandomCharacterGenerator.generateRandomCharacters();
+    RandomCharacterGenerator.generateRandomCharacters(10);
     new MapScreen().show();
+
+    Character.startGameLoop();
   }
 
   static endGame() {}

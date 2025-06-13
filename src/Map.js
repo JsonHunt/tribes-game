@@ -4,24 +4,34 @@ export class Map {
   constructor(mapTiles) {
     this.tiles = []; // 2D array of tile data
     this.mapElement = document.createElement("div");
-    this.width = 100; // Default width, number of tiles horizontally
-    this.height = 100; // Default height, number of tiles vertically
+    this.width = mapTiles[0].length; // Default width, number of tiles horizontally
+    this.height =  mapTiles.length; // Default height, number of tiles vertically
     this.tileSize = 32; // Default tile size in pixels
     this.zoomLevel = 1;
+    this.left = 0; // Track map X offset
+    this.top = 0;  // Track map Y offset
     this.spawnTiles(mapTiles);
   }
 
   static discardMap() {}
 
   spawnTiles(mapTiles) {
+    // Set up mapElement as a grid container
+    this.mapElement.style.display = 'grid';
+    this.mapElement.style.gridTemplateColumns = `repeat(${this.width}, ${this.tileSize}px)`;
+    this.mapElement.style.gridTemplateRows = `repeat(${this.height}, ${this.tileSize}px)`;
+    this.mapElement.style.position = 'relative';
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const tile = new MapTile(mapTiles[y][x]);
         this.mapElement.appendChild(tile.domElement);
         tile.domElement.style.width = `${this.tileSize}px`;
         tile.domElement.style.height = `${this.tileSize}px`;
-        tile.domElement.style.left = `${x * this.tileSize}px`;
-        tile.domElement.style.top = `${y * this.tileSize}px`;
+        tile.domElement.style.position = 'relative';
+        tile.domElement.style.left = '';
+        tile.domElement.style.top = '';
+        tile.domElement.style.gridColumn = x + 1;
+        tile.domElement.style.gridRow = y + 1;
         if (!this.tiles[y]) this.tiles[y] = [];
         this.tiles[y][x] = tile;
       }
@@ -29,17 +39,30 @@ export class Map {
   }
 
   move(deltaX, deltaY) {
-    this.mapElement.style.transform = `translate(${this.left + deltaX}px, ${this.top + deltaY}px)`;
+    this.left += deltaX;
+    this.top += deltaY;
+    this._updateTransform();
   }
 
   zoomIn() {
     this.zoomLevel = Math.min(4, this.zoomLevel + 0.2);
-    this.mapElement.style.transform = `scale(${this.zoomLevel})`;
+    this._updateTransform();
   }
 
   zoomOut() {
     this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.2);
-    this.mapElement.style.transform = `scale(${this.zoomLevel})`;
+    this._updateTransform();
+  }
+
+  _updateTransform() {
+    this.mapElement.style.transform = `translate(${this.left}px, ${this.top}px) scale(${this.zoomLevel})`;
+  }
+
+  static getRandomPosition() {
+    const map = Map.currentMap;
+    const x = Math.floor(Math.random() * map.width);
+    const y = Math.floor(Math.random() * map.height);
+    return { x, y };
   }
 
   findClosestTerrain(position, terrainType, maxDistance = 10) {
