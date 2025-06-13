@@ -1,18 +1,46 @@
 /* Character styles */
 .character {
+    position: absolute;
     background-color: transparent !important;
     border-radius: 2px;
     border: none !important;
     box-shadow: none !important;
-    transition: border 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s;
+    z-index: 10;
 }
 .character.hovered {
     border: 2px solid #3498db !important;
     box-shadow: 0 0 8px #3498db !important;
 }
-.character-name-label,
+.character-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 2px;
+    pointer-events: none;
+}
+.character-name-label {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    pointer-events: none;
+    z-index: 11;
+    white-space: nowrap;
+}
 .character-action-label {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    pointer-events: none;
+    z-index: 11;
+    white-space: nowrap;
 }
 .character-info-panel {
     position: absolute;

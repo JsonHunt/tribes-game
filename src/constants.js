@@ -1,11 +1,4 @@
-// Terrain types
-export const TERRAIN_TYPES = {
-    GRASS: 'grass',
-    ROCK: 'rock', 
-    WATER: 'water',
-    SNOW: 'snow',
-    SAND: 'sand'
-};
+
 
 // Character action types
 export const ACTION_TYPES = {
